@@ -1,0 +1,22 @@
+site_name: Spello Consulting Smart Device Library
+site_url: https://github.com/NickElseySpelloC/sc-smart-device
+
+theme:
+  name: material
+
+plugins:
+  - search
+  - include-markdown
+  - mkdocstrings:
+      handlers:
+        python:
+          paths:
+            - src
+          options:
+            docstring_style: google  # or numpy, sphinx
+            show_source: false
+            heading_level: 2
+
+nav:
+  - Home: index.md
+
