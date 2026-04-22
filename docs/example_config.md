@@ -10,28 +10,39 @@ Below is an example YAML configuration, as used by the code examples available a
 
 ## Configuration Reference
 
-The following keys are supported:
+The following SCSmartDevices: keys are supported:
 
 | Parameter | Description | 
 |:--|:--|
+| AllowDebugLogging | Set to true to enable debug logging output | 
 | ResponseTimeout | How long to wait (in seconds) before timeing out when making an API call or ping. | 
 | RetryCount | How many retries to make if an API call times out. | 
 | RetryDelay | How long to wait (in seconds) between retry attempts. | 
 | PingAllowed | Set to False if ICMP isn't suppported by the route to your devices. |
 | SimulationFileFolder | The folder to save JSON simulation files in. | 
-| WebhooksEnabled | Enable or disable the webhook listener |
-| WebhookHost | IP to listen for webhooks on. This should be the IP address of the machine running the app. Defaults to 0.0.0.0. |
-| WebhookPort | Port to listen for webhooks on. Defaults to 8787. |
-| WebhookPath | The URI path that webhooks will post to. |
-| DefaultWebhooks | The webhooks to install by default. See the example above for format. Look at the SupportedWebhooks key of an initialised Shelly device to see which webhook events your device supports. Use the  get_device() call to get a device object.  |
-| Devices | A list of dicts, each on defining a Shelly device. - see below |
+| ShellyWebhooks | This optional section configures the webhooks to be installed on Shelly devices (not applicable to Tasmota devices) - see below.  | 
+| Devices | A list of dicts, each on defining an individual device. - see below |
 
-The Devices key in the configuration block supports the following keys :
+### ShellyWebhooks key
+
+The ShellyWebhooks key in the configuration block supports the following keys :
+
+| Parameter | Description | 
+|:--|:--|
+| Enabled | Enable or disable the webhook listener |
+| Host | IP to listen for webhooks on. This should be the IP address of the machine running the app. Defaults to 0.0.0.0. |
+| Port | Port to listen for webhooks on. Defaults to 8787. |
+| Path | The URI path that webhooks will post to. |
+| DefaultWebhooks | The webhooks to install by default. See the example above for format. Look at the SupportedWebhooks key of an initialised Shelly device to see which webhook events your device supports. Use the  get_device() call to get a device object.  |
+
+### Devices key
+
+The Devices key in the configuration block supports the following keys:
 
 | Parameter | Description | 
 |:--|:--|
 | Name | Your name for this device  |
-| Model | The model Shelly ID for this device. See the **Shelly Models List** for more. |
+| Model | Either the Shelly model ID for this device (if a Shelly device - see [Shelly Models List](shelly_models_list.md)) or "Tasmota" if this is a Tasmota ESP32 device. |
 | Hostname | The network IP address or hostname for this device. |
 | ID | Your numeric ID for this device. |
 | Simulate | Set this to True if you don't have access to the device but still want to test your code. When True, this device will be in 'simulation' mode. Rather than make API calls to the device, the state will be written to and read from a local json file (with the same name as your Name entry). You can modify some of the values in this file to test your code. |
@@ -44,3 +55,15 @@ The Devices key in the configuration block supports the following keys :
 Notes:
 
 - Either a Device Name or a Device ID must be supplied.
+
+## Shelly device components
+
+Shelly hardware devices can potentially have a combination of four types of component - inputs, outputs, meters and temp. probes. These are configured under the Devices: key of the SCSmartDevices: configuration. If you specify an ID and/or name for a device's component (e.g. the two output components of a Shelly2PMG3), then you must define _all_ the components of this type for that device. If the number of configured components don't match the number of actual components of that type (as defined in the models library), then the SCSmartDevices() initialisation will fail.
+
+If you leave the configuration blank for a device's components, then the system will create default IDs and names for you.
+
+## Tasmota device components
+
+Due to the very large range of Tasmota devices on the market, it's not possible to maintain a library reference of each model and the type & number of components each model supports. 
+
+Therefore, you **must** configure each componenet in your YAML configuration as this will dictate the capabilities of the device.

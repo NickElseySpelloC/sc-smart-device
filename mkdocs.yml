@@ -3,7 +3,9 @@ site_url: https://github.com/NickElseySpelloC/sc-smart-device
 
 theme:
   name: material
-
+  features:
+    - navigation.expand
+    
 plugins:
   - search
   - include-markdown
@@ -19,6 +21,8 @@ plugins:
 
 nav:
   - Home: index.md
+  - Configuration: example_config.md
+  - Shelly Models Library: shelly_models_list.md
   - API Reference:
       - SCSmartDevice: sc_smart_device.md
       - SmartDeviceView: sc_smart_device_view.md
