@@ -1,4 +1,4 @@
-"""Manual testing code for the ShellyControl class."""
+"""Example of using the SmartDevice control to handle webhooks."""
 # ruff: noqa: E402
 
 import platform
@@ -17,7 +17,7 @@ if str(_project_root / "src") not in sys.path:
 
 from sc_foundation import SCLogger
 
-from development.switch_init import switch_init
+from examples.switch_init import switch_init
 from sc_smart_device import SCSmartDevice
 
 

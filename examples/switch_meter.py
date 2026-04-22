@@ -1,4 +1,4 @@
-"""Manual testing code for the ShellyControl class."""
+"""Example of using the SmartDevice control to read energy meters."""
 # ruff: noqa: E402
 
 import platform
@@ -15,7 +15,7 @@ if str(_project_root / "src") not in sys.path:
 
 from sc_foundation import SCLogger
 
-from development.switch_init import switch_init
+from examples.switch_init import switch_init
 from sc_smart_device import SCSmartDevice
 
 
@@ -32,6 +32,7 @@ def test_new_meter(logger: SCLogger, smart_switch_control: SCSmartDevice):  # no
 
     logger.log_message(f"Testing meter functionality for device: {meter_device_name}", "summary")
 
+    # Get the device and components
     try:
         meter_device = smart_switch_control.get_device(meter_device_name)
         output = smart_switch_control.get_device_component("output", output_name)

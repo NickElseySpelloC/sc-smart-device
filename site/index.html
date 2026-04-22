@@ -262,9 +262,129 @@
 
 
 <h1 id="spello-consulting-smart-device-libary">Spello Consulting Smart Device Libary</h1>
-<blockquote>
-<p>TO DO: All documentation pages need to be reviewed and restructured after phase 7 of the sc-utility migration is complete.</p>
-</blockquote>
+<pre><code class="language-python">
+  &quot;&quot;&quot;Example code using the sc_utility libraries. Should not be included in the distrbution.&quot;&quot;&quot;
+  # ruff: noqa: E402
+
+  import platform
+  import sys
+  import threading
+  from pathlib import Path
+
+  from mergedeep import merge
+
+  # Allow running this script directly from a src/ layout checkout.
+  _project_root = Path(__file__).resolve().parents[1]
+  if str(_project_root) not in sys.path:
+      sys.path.insert(0, str(_project_root))
+  if str(_project_root / &quot;src&quot;) not in sys.path:
+      sys.path.insert(0, str(_project_root / &quot;src&quot;))
+
+  from sc_foundation import SCConfigManager, SCLogger
+
+  from examples.validation_extras import smart_switch_extra_validation
+  from sc_smart_device import SCSmartDevice, smart_devices_validator
+
+  CONFIG_FILE = &quot;examples/switch_config.yaml&quot;
+
+
+  def main():  # noqa: PLR0914, PLR0915
+      device_identity = &quot;Sydney Dev A&quot;
+      output_identity = &quot;Sydney Dev A O1&quot;
+
+      loop_delay = 5
+      loop_count = 0
+      max_loops = 20
+      wake_event = threading.Event()
+
+      print(f&quot;Hello from simple_example running on {platform.system()}&quot;)
+
+      # Merge the SmartDevices validation schema with the default validation schema
+      merged_schema = merge({}, smart_devices_validator, smart_switch_extra_validation)
+      assert isinstance(merged_schema, dict), &quot;Merged schema should be type dict&quot;
+
+      # Initialize the SC_ConfigManager class
+      try:
+          config = SCConfigManager(config_file=CONFIG_FILE, validation_schema=merged_schema)
+      except RuntimeError as e:
+          print(f&quot;Configuration file error: {e}&quot;, file=sys.stderr)
+          return
+
+      # Initialize the SC_Logger class
+      try:
+          logger = SCLogger(config.get_logger_settings())
+      except RuntimeError as e:
+          print(f&quot;Logger initialisation error: {e}&quot;, file=sys.stderr)
+          return
+
+      smart_switch_settings = config.get(&quot;SCSmartDevices&quot;)
+
+      if smart_switch_settings is None:
+          error_msg = &quot;No SmartDevices settings found in the configuration file.&quot;
+          raise RuntimeError(error_msg)
+
+      # Initialize the SCSmartDevice class
+      try:
+          smart_switch_control = SCSmartDevice(logger, smart_switch_settings, wake_event)
+      except RuntimeError as e:
+          error_msg = f&quot;SCSmartDevice initialization error: {e}&quot;
+          raise RuntimeError(error_msg) from e
+      logger.log_message(f&quot;SCSmartDevice initialized successfully with {len(smart_switch_control.devices)} devices.&quot;, &quot;summary&quot;)
+
+      # Print the model library
+      print(f&quot;Print brief version of model library:\n {smart_switch_control.print_model_library(mode_str='brief')}&quot;)
+
+      # Print the list of devices as configured in the config file
+      print(f&quot;Print all devices:\n {smart_switch_control.print_device_status()}&quot;)
+
+      # Get a device
+      try:
+          device = smart_switch_control.get_device(device_identity)
+      except (RuntimeError, TimeoutError) as e:
+          print(e, file=sys.stderr)
+      else:
+          print(f&quot;Device {device_identity} model: {device.get('Model', 'Unknown')}&quot;)
+          print(f&quot;Device {device_identity} is {'online' if device.get('Online', False) else 'offline'}.&quot;)
+
+      # Change the output of a device
+      output = smart_switch_control.get_device_component(&quot;output&quot;, output_identity)
+      current_state = output[&quot;State&quot;]
+      result, did_change = smart_switch_control.change_output(output_identity, not current_state)
+      print(f&quot;Output {output_identity} changed: {did_change}, Result: {result}&quot;)
+
+      # Loop and listed for webhook events
+      while loop_count &lt; max_loops:  # noqa: PLR1702
+          print(f&quot;Starting loop {loop_count + 1}/{max_loops}&quot;)
+
+          # Do application stuff here
+
+          # Wait for a webhook event or timeout
+          wake_event.wait(timeout=loop_delay)
+          if wake_event.is_set():
+              try:
+                  # We were woken by a webhook call
+                  event = smart_switch_control.pull_webhook_event()
+                  if event:
+                      print(f&quot;Received webhook event: {event.get('Event')}&quot;)
+                      if event.get(&quot;Event&quot;) in {&quot;input.toggle_on&quot;, &quot;input.toggle_off&quot;}:
+                          # An input was toggled on/off, change the corresponding output
+                          output_identity = event.get(&quot;Component&quot;)
+                          if not output_identity:
+                              print(f&quot;Unable to get component object for event: {event}&quot;, file=sys.stderr)
+                              continue
+                          new_state = event.get(&quot;Event&quot;) == &quot;input.toggle_on&quot;
+                          result, did_change = smart_switch_control.change_output(output_identity, new_state)
+                          print(f&quot;Output {output_identity} changed: {did_change}, Result: {result}&quot;)
+              except (AttributeError, RuntimeError) as e:
+                  print(f&quot;Error processing webhook event: {e}&quot;, file=sys.stderr)
+              wake_event.clear()
+          loop_count += 1
+
+
+  if __name__ == &quot;__main__&quot;:
+      main()
+
+</code></pre>
 
 
 

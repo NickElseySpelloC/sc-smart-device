@@ -1,0 +1,69 @@
+Files:
+  LogfileName: development/logfile.log
+  LogfileVerbosity: detailed
+  ConsoleVerbosity: detailed
+
+
+SCSmartDevices:
+  AllowDebugLogging: False
+  ResponseTimeout: 3
+  RetryCount: 1
+  RetryDelay: 2
+  PingAllowed: True
+  SimulationFileFolder: simulation_files
+  ShellyWebhooks:
+    Enabled: True
+    Host: 192.168.86.47
+    Port: 8787
+    Path: /shelly/webhook
+    DefaultWebhooks:
+      Inputs:
+        - input.toggle_on
+        - input.toggle_off
+        - input.button_push
+      Outputs:
+        - switch.on
+        - switch.off  
+  Devices:
+    - Name: Sydney Dev A
+      Model: Shelly2PMG3
+      Hostname: 192.168.86.30
+      Simulate: False
+      ExpectOffline: True
+      Inputs:
+        - Name: "Sydney Dev A I1"
+          Webhooks: True
+        - Name: "Sydney Dev A I2"
+      Outputs:
+        - Name: "Sydney Dev A O1"
+          Webhooks: True
+        - Name: "Sydney Dev A O2"
+      Meters:
+        - Name: "Sydney Dev A M1"
+        - Name: "Sydney Dev A M2"
+    - Name: Sydney Solar
+      Model: Shelly2PMG3
+      Hostname: 192.168.86.35
+      Simulate: True
+      ExpectOffline: True
+      Outputs:
+        - Name: "Solar Pump Output"
+          Size: "Large"
+        - Name: "Solar Valve Output"
+          Colour: "Blue"
+      Meters:
+        - Name: "Solar Pump Meter"
+        - Name: "Solar Pump Output"
+      TempProbes:
+        - Name: "Sydney Solar"
+        - Name: "Temp Roof"
+        - Name: "Temp Solar Return"
+        - Name: "Temp Pool Water"
+    - Name: Sydney Panel EM1
+      Model: ShellyEMG3
+      Hostname: 192.168.86.44
+      Outputs:
+        - Name: "Sydney Panel EM1 O1"
+      Meters:
+        - Name: "Sydney Panel EM1 M1"
+        - Name: "Sydney Panel EM1 M2"

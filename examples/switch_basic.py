@@ -1,4 +1,4 @@
-"""Manual testing code for the smart_switchControl class."""
+"""Basic example of SmartDevice control."""
 # ruff: noqa: E402
 
 import platform
@@ -15,19 +15,19 @@ if str(_project_root / "src") not in sys.path:
 
 from sc_foundation import SCLogger
 
-from development.switch_init import switch_init
+from examples.switch_init import switch_init
 from sc_smart_device import SCSmartDevice
 
 
 def test_basic(logger: SCLogger, smart_switch_control: SCSmartDevice) -> None:
-    """Test function for basic Smart_switch control."""
+    """Test function for basic SmartSwitch control."""
     device_identity = "Sydney Dev A"
     output_identity = "Sydney Dev A O1"
     meter_identity = "Sydney Dev A M1"
 
     logger.log_message(f"\n\n\nTesting basic functionality for device: {device_identity}", "summary")
 
-    # Get the Smart_switch device
+    # Get the device
     try:
         device = smart_switch_control.get_device(device_identity)
         device_status = smart_switch_control.get_device_status(device)

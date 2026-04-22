@@ -9,10 +9,10 @@ from sc_foundation import (
     SCLogger,
 )
 
-from development.validation_schema import ConfigSchema
+from examples.validation_extras import smart_switch_extra_validation
 from sc_smart_device import SCSmartDevice, smart_devices_validator
 
-CONFIG_FILE = "development/switch_config.yaml"
+CONFIG_FILE = "examples/switch_config.yaml"
 
 
 def switch_init(wake_event: threading.Event | None = None) -> tuple[SCConfigManager, SCLogger, SCSmartDevice]:
@@ -27,11 +27,8 @@ def switch_init(wake_event: threading.Event | None = None) -> tuple[SCConfigMana
     Raises:
         RuntimeError: If there is an error with the configuration file, logger initialization, or SCSmartDevice initialization.
     """
-    # Get our default schema, validation schema, and placeholders
-    schemas = ConfigSchema()
-
     # Merge the SmartDevices validation schema with the default validation schema
-    merged_schema = merge({}, smart_devices_validator, schemas.smart_switch_extra_validation)
+    merged_schema = merge({}, smart_devices_validator, smart_switch_extra_validation)
     assert isinstance(merged_schema, dict), "Merged schema should be type dict"
 
     # Initialize the SC_ConfigManager class
