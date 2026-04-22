@@ -22,6 +22,7 @@ plugins:
 nav:
   - Home: index.md
   - Configuration: example_config.md
+  - Object Reference: objects.md
   - Shelly Models Library: shelly_models_list.md
   - API Reference:
       - SCSmartDevice: sc_smart_device.md

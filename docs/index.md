@@ -37,3 +37,10 @@ Or better yet, use UV:
 
 The library uses a YAML file for configuration. An example config file (examples/switch_config.yaml) is included in this package. See the [example config page](example_config.md) for the yaml example and a reference for each section.
 
+## API Reference
+
+See these pages for a detailed reference of the classes available from this package:
+
+- [SCSmartDevice](sc_smart_device.md)
+- [SmartDeviceView](sc_smart_device_view.md)
+- [SmartDeviceWorker](sc_smart_device_worker.md)

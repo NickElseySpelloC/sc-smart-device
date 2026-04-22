@@ -16,22 +16,7 @@ if TYPE_CHECKING:
 
 
 class SCSmartDevice:  # noqa: PLR0904
-    """Unified smart-device controller.
-
-    Accepts the ``SCSmartDevices:`` config block parsed from the client app's
-    YAML file and instantiates the appropriate hardware providers.
-
-    Signature matches the legacy ``ShellyControl`` constructor so existing
-    client apps require minimal changes.
-
-    Args:
-        logger: SCLogger instance from sc-foundation.
-        device_settings: The ``SCSmartDevices`` dict from the app config.
-        app_wake_event: Optional threading.Event set when a webhook fires.
-
-    Raises:
-        RuntimeError: If config is invalid or the model file cannot be loaded.
-    """
+    """Unified smart-device controller."""
 
     def __init__(
         self,
@@ -39,6 +24,19 @@ class SCSmartDevice:  # noqa: PLR0904
         device_settings: dict,
         app_wake_event: threading.Event | None = None,
     ) -> None:
+        """Accepts the ``SCSmartDevices:`` config block parsed from the client app's YAML file and instantiates the appropriate hardware providers.
+
+        Signature matches the legacy ``ShellyControl`` constructor so existing
+        client apps require minimal changes.
+
+        Args:
+            logger: SCLogger instance from sc-foundation.
+            device_settings: The ``SCSmartDevices`` dict from the app config.
+            app_wake_event: Optional threading.Event set when a webhook fires.
+
+        Raises:
+            RuntimeError: If config is invalid or the model file cannot be loaded.
+        """  # noqa: DOC502
         self._logger = logger
         self._provider = ShellyProvider(logger, app_wake_event)
         self._provider.initialize_settings(device_settings)
