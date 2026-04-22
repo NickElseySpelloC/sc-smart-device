@@ -46,9 +46,8 @@ class _ShellyWebhookHandler(BaseHTTPRequestHandler):
             args = parse_qs(query_string)
             if self.logger:
                 self.logger.log_message(f"Webhook GET {self.path} args={args}", "debug")
-        else:
-            if self.logger:
-                self.logger.log_message(f"Webhook GET {self.path} (no args)", "debug")
+        elif self.logger:
+            self.logger.log_message(f"Webhook GET {self.path} (no args)", "debug")
 
         try:
             controller = getattr(self.server, "controller", None)

@@ -4,16 +4,18 @@ Client apps should only depend on this class, not on any provider directly.
 """
 from __future__ import annotations
 
-import threading
+from typing import TYPE_CHECKING
 
-from sc_foundation import SCLogger
-
-from sc_smart_device.models.smart_device_status import SmartDeviceStatus
 from sc_smart_device.models.smart_device_view import SmartDeviceView
 from sc_smart_device.providers.shelly_provider import ShellyProvider
 
+if TYPE_CHECKING:
+    import threading
 
-class SCSmartDevice:
+    from sc_foundation import SCLogger
+
+
+class SCSmartDevice:  # noqa: PLR0904
     """Unified smart-device controller.
 
     Accepts the ``SCSmartDevices:`` config block parsed from the client app's
@@ -108,9 +110,6 @@ class SCSmartDevice:
             device_identity: Device dict, integer ID, or name string.
                              A component dict is also accepted and returns the
                              parent device.
-
-        Raises:
-            RuntimeError: If no matching device is found.
         """
         return self._provider.get_device(device_identity)
 
@@ -127,28 +126,41 @@ class SCSmartDevice:
                             or ``"temp_probe"``.
             component_identity: Component ID (int) or name (str).
             use_index: If True, match by ``ComponentIndex`` instead of ID/name.
-
-        Raises:
-            RuntimeError: If the component is not found.
         """
         return self._provider.get_device_component(component_type, component_identity, use_index)
 
     # ── Convenience component shorthand ─────────────────────────────────────
 
     def get_output(self, output_identity: int | str) -> dict:
-        """Shorthand for ``get_device_component("output", output_identity)``."""
+        """Shorthand for ``get_device_component("output", output_identity)``.
+
+        Returns:
+            The internal output component dict.
+        """
         return self._provider.get_device_component("output", output_identity)
 
     def get_input(self, input_identity: int | str) -> dict:
-        """Shorthand for ``get_device_component("input", input_identity)``."""
+        """Shorthand for ``get_device_component("input", input_identity)``.
+
+        Returns:
+            The internal input component dict.
+        """
         return self._provider.get_device_component("input", input_identity)
 
     def get_meter(self, meter_identity: int | str) -> dict:
-        """Shorthand for ``get_device_component("meter", meter_identity)``."""
+        """Shorthand for ``get_device_component("meter", meter_identity)``.
+
+        Returns:
+            The internal meter component dict.
+        """
         return self._provider.get_device_component("meter", meter_identity)
 
     def get_temp_probe(self, probe_identity: int | str) -> dict:
-        """Shorthand for ``get_device_component("temp_probe", probe_identity)``."""
+        """Shorthand for ``get_device_component("temp_probe", probe_identity)``.
+
+        Returns:
+            The internal temperature probe component dict.
+        """
         return self._provider.get_device_component("temp_probe", probe_identity)
 
     # ── Device status ────────────────────────────────────────────────────────
@@ -172,10 +184,6 @@ class SCSmartDevice:
 
         Returns:
             True if the device is online and status was retrieved.
-
-        Raises:
-            RuntimeError: On a non-recoverable communication error.
-            TimeoutError: If the device is reachable but the request times out.
         """
         return self._provider.get_device_status(device_identity)
 
@@ -202,10 +210,6 @@ class SCSmartDevice:
             ``(success, did_change)`` — success is False when the device is
             offline; did_change is False when the output was already in the
             requested state.
-
-        Raises:
-            RuntimeError: On a non-recoverable error.
-            TimeoutError: If the device is reachable but the request times out.
         """
         return self._provider.set_output(output_identity, new_state)
 
@@ -225,9 +229,6 @@ class SCSmartDevice:
             component: Component dict (from :meth:`get_device_component`).
             url: Override the callback URL. Auto-constructed if None.
             additional_payload: Extra query-string parameters to include.
-
-        Raises:
-            RuntimeError: If the event is not supported or the install fails.
         """
         self._provider.install_webhook(event, component, url, additional_payload)
 

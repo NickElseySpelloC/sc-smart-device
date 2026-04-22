@@ -12,9 +12,9 @@ from sc_smart_device.smart_device import SCSmartDevice
 from sc_smart_device.validation.smart_devices_validator import smart_devices_validator
 
 __all__ = [
+    "DeviceCapability",
     "SCSmartDevice",
     "SmartDeviceStatus",
     "SmartDeviceView",
-    "DeviceCapability",
     "smart_devices_validator",
 ]

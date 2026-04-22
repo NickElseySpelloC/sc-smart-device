@@ -8,11 +8,10 @@ import time
 from http.server import ThreadingHTTPServer
 from importlib import resources
 from pathlib import Path
+from typing import NoReturn
 
 import requests
-
-from sc_foundation import SCCommon, SCLogger
-from sc_foundation import DateHelper
+from sc_foundation import DateHelper, SCCommon, SCLogger
 
 from sc_smart_device.models.capabilities import DeviceCapability
 from sc_smart_device.models.smart_device_status import SmartDeviceStatus
@@ -69,6 +68,10 @@ class ShellyProvider(BaseProvider):
         self.models: list[dict] = []
         self._import_models()
 
+    @staticmethod
+    def _raise_runtime_error(message: str) -> NoReturn:
+        raise RuntimeError(message)
+
 # ── BaseProvider contract ────────────────────────────────────────────────────
 
     def initialize_settings(self, provider_config: dict, refresh_status: bool = True) -> None:
@@ -120,7 +123,11 @@ class ShellyProvider(BaseProvider):
 # ── Public helpers (called via SCSmartDevice delegation) ─────────────────────
 
     def get_device(self, device_identity: dict | int | str) -> dict:
-        """Return the internal mutable device dict for the given identity."""
+        """Return the internal mutable device dict for the given identity.
+
+        Raises:
+            RuntimeError: If no matching device is found.
+        """
         if isinstance(device_identity, dict):
             if device_identity.get("ObjectType") == "device":
                 return device_identity
@@ -138,7 +145,11 @@ class ShellyProvider(BaseProvider):
         component_identity: int | str,
         use_index: bool | None = None,
     ) -> dict:
-        """Return the internal mutable component dict."""
+        """Return the internal mutable component dict.
+
+        Raises:
+            RuntimeError: If the component type is invalid or no match is found.
+        """
         lists = {
             "input": self._inputs,
             "output": self._outputs,
@@ -146,13 +157,15 @@ class ShellyProvider(BaseProvider):
             "temp_probe": self._temp_probes,
         }
         if component_type not in lists:
-            raise RuntimeError(f"Invalid component type {component_type!r}.")
+            msg = f"Invalid component type {component_type!r}."
+            raise RuntimeError(msg)
         for component in lists[component_type]:
             if use_index and component["ComponentIndex"] == component_identity:
                 return component
             if component["ID"] == component_identity or component["Name"] == component_identity:
                 return component
-        raise RuntimeError(f"{component_type} {component_identity!r} not found.")
+        msg = f"{component_type} {component_identity!r} not found."
+        raise RuntimeError(msg)
 
     def is_device_online(self, device_identity: dict | int | str | None = None) -> bool:
         found_offline = False
@@ -191,7 +204,7 @@ class ShellyProvider(BaseProvider):
     ) -> None:
         device = self.get_device(component)
         if not any(wh.get("name") == event for wh in device.get("SupportedWebhooks", [])):
-            raise RuntimeError(f"Event {event!r} not supported for {component.get('Name')!r}.")
+            self._raise_runtime_error(f"Event {event!r} not supported for {component.get('Name')!r}.")
         if not device.get("Online", False):
             self.logger.log_message(f"{device.get('Name')} offline — webhook {event!r} deferred.", "warning")
             device["WebhookInstallPending"] = True
@@ -258,10 +271,10 @@ class ShellyProvider(BaseProvider):
             return self.webhook_event_queue.pop(0)
         return None
 
-    def print_device_status(self, device_identity: int | str | None = None) -> str:  # noqa: PLR0912, PLR0915
+    def print_device_status(self, device_identity: int | str | None = None) -> str:  # noqa: PLR0912
         device_index = None
         return_str = ""
-        try:  # noqa: PLR1702
+        try:
             if device_identity is not None:
                 device_index = self.get_device(device_identity)["Index"]
             for idx, device in enumerate(self._devices):
@@ -362,7 +375,7 @@ class ShellyProvider(BaseProvider):
         self.simulation_file_folder = SCCommon.select_folder_location(relative_folder, create_folder=True)
 
         webhook_cfg: dict = settings.get("ShellyWebhooks") or {}
-        self.webhook_enabled = bool(webhook_cfg.get("Enabled", False)) and self._app_wake_event is not None
+        self.webhook_enabled = bool(webhook_cfg.get("Enabled")) and self._app_wake_event is not None
         self.webhook_callback_host = webhook_cfg.get("Host", DEFAULT_WEBHOOK_CALLBACK_HOST)
         self.webhook_port = int(webhook_cfg.get("Port", DEFAULT_WEBHOOK_PORT))
         self.webhook_path = webhook_cfg.get("Path", DEFAULT_WEBHOOK_PATH)
@@ -388,25 +401,27 @@ class ShellyProvider(BaseProvider):
         new_device["Name"] = client_name or f"Device {device_id}"
         new_device["ClientName"] = new_device["Name"]  # internal alias kept for compat
         new_device["Label"] = f"{new_device['Name']} (ID: {device_id})"
-        new_device["Simulate"] = bool(device_config.get("Simulate", False))
-        new_device["ExpectOffline"] = bool(device_config.get("ExpectOffline", False))
+        new_device["Simulate"] = bool(device_config.get("Simulate"))
+        new_device["ExpectOffline"] = bool(device_config.get("ExpectOffline"))
         new_device["Hostname"] = device_config.get("Hostname")
         new_device["Port"] = device_config.get("Port", 80)
         new_device["TempProbes"] = len(device_config.get("TempProbes") or [])
 
         if not new_device["Simulate"] and not new_device["Hostname"]:
-            raise RuntimeError(f"Device {new_device['Label']} has no Hostname configured.")
+            self._raise_runtime_error(f"Device {new_device['Label']} has no Hostname configured.")
         if new_device["Hostname"] and not SCCommon.is_valid_hostname(new_device["Hostname"]):
-            raise RuntimeError(f"Device {new_device['Label']} has invalid hostname {new_device['Hostname']!r}.")
+            self._raise_runtime_error(
+                f"Device {new_device['Label']} has invalid hostname {new_device['Hostname']!r}."
+            )
 
         for existing in self._devices:
             if existing["Name"] == new_device["Name"]:
-                raise RuntimeError(f"Device Name {new_device['Name']!r} must be unique.")
+                self._raise_runtime_error(f"Device Name {new_device['Name']!r} must be unique.")
             if existing["ID"] == new_device["ID"]:
-                raise RuntimeError(f"Device ID {new_device['ID']} must be unique.")
+                self._raise_runtime_error(f"Device ID {new_device['ID']} must be unique.")
 
         if not new_device["ID"] and not new_device["Name"]:
-            raise RuntimeError("Device must have an ID or a Name.")
+            self._raise_runtime_error("Device must have an ID or a Name.")
 
         if new_device["Simulate"]:
             fname = "".join(c if c.isalnum() else "_" for c in new_device["Name"]) + ".json"
@@ -430,10 +445,10 @@ class ShellyProvider(BaseProvider):
 
     def _get_device_attributes(self, device_model: str) -> dict:
         if not self.models:
-            raise RuntimeError(f"Model file {SHELLY_MODEL_FILE} not loaded.")
+            self._raise_runtime_error(f"Model file {SHELLY_MODEL_FILE} not loaded.")
         model_dict = next((m for m in self.models if m.get("model") == device_model), None)
         if model_dict is None:
-            raise RuntimeError(f"Device model {device_model!r} not found in {SHELLY_MODEL_FILE}.")
+            self._raise_runtime_error(f"Device model {device_model!r} not found in {SHELLY_MODEL_FILE}.")
         device: dict = {
             "Index": 0,
             "Model": device_model,
@@ -471,29 +486,29 @@ class ShellyProvider(BaseProvider):
             "TotalEnergy": 0.0,
         }
         if not device["MetersSeperate"] and device["Meters"] > 0 and device["Meters"] != device["Outputs"]:
-            raise RuntimeError(
+            self._raise_runtime_error(
                 f"Model {device_model}: meters ({device['Meters']}) ≠ outputs ({device['Outputs']}) "
                 "when meters are not separate."
             )
         return device
 
-    def _add_device_components(
+    def _add_device_components(  # noqa: PLR0912
         self,
         device_index: int,
         component_type: str,
         component_config: list[dict] | None,
-    ) -> None:  # noqa: PLR0912, PLR0915
+    ) -> None:
         if device_index < 0 or device_index >= len(self._devices):
-            raise RuntimeError(f"Invalid device index {device_index}.")
+            self._raise_runtime_error(f"Invalid device index {device_index}.")
 
         type_map = {
-            "input":      ("Inputs",     self._inputs,      "Input"),
-            "output":     ("Outputs",    self._outputs,     "Output"),
-            "meter":      ("Meters",     self._meters,      "Meter"),
+            "input": ("Inputs", self._inputs, "Input"),
+            "output": ("Outputs", self._outputs, "Output"),
+            "meter": ("Meters", self._meters, "Meter"),
             "temp_probe": ("TempProbes", self._temp_probes, "TempProbe"),
         }
         if component_type not in type_map:
-            raise RuntimeError(f"Invalid component type {component_type!r}.")
+            self._raise_runtime_error(f"Invalid component type {component_type!r}.")
 
         count_key, storage, prefix = type_map[component_type]
         device = self._devices[device_index]
@@ -502,7 +517,7 @@ class ShellyProvider(BaseProvider):
         if component_config is not None and (
             not isinstance(component_config, list) or len(component_config) != expected
         ):
-            raise RuntimeError(
+            self._raise_runtime_error(
                 f"Device {device['Label']}: expected {expected} {component_type}(s), "
                 f"got {len(component_config) if isinstance(component_config, list) else 'non-list'}."
             )
@@ -544,12 +559,12 @@ class ShellyProvider(BaseProvider):
 
             for existing in storage:
                 if existing["Name"] == new_comp["Name"]:
-                    raise RuntimeError(f"{prefix} Name {new_comp['Name']!r} must be unique.")
+                    self._raise_runtime_error(f"{prefix} Name {new_comp['Name']!r} must be unique.")
                 if existing["ID"] == new_comp["ID"]:
-                    raise RuntimeError(f"{prefix} ID {new_comp['ID']} must be unique.")
+                    self._raise_runtime_error(f"{prefix} ID {new_comp['ID']} must be unique.")
 
             if not new_comp["ID"] and not new_comp["Name"]:
-                raise RuntimeError(f"{prefix} must have an ID or a Name.")
+                self._raise_runtime_error(f"{prefix} must have an ID or a Name.")
 
             storage.append(new_comp)
 
@@ -591,7 +606,9 @@ class ShellyProvider(BaseProvider):
     def _get_device_status(self, device_identity: dict | int | str) -> bool:  # noqa: PLR0912, PLR0914, PLR0915
         if isinstance(device_identity, dict):
             if device_identity.get("ObjectType") != "device":
-                raise RuntimeError(f"Expected device dict, got ObjectType={device_identity.get('ObjectType')!r}.")
+                self._raise_runtime_error(
+                    f"Expected device dict, got ObjectType={device_identity.get('ObjectType')!r}."
+                )
             device = device_identity
         else:
             device = self.get_device(device_identity)
@@ -618,9 +635,11 @@ class ShellyProvider(BaseProvider):
             elif device["Protocol"] == "REST":
                 result, result_data = self._rest_request(device, "status")
                 if not device["MetersSeperate"]:
-                    raise RuntimeError(f"Model {device['Model']} has combined meters & switches — not supported.")
+                    self._raise_runtime_error(
+                        f"Model {device['Model']} has combined meters & switches — not supported."
+                    )
             else:
-                raise RuntimeError(f"Unsupported protocol {device['Protocol']!r} for {device['Label']}.")
+                self._raise_runtime_error(f"Unsupported protocol {device['Protocol']!r} for {device['Label']}.")
         except TimeoutError as e:
             self.logger.log_message(f"Timeout getting status for {device['Label']}: {e}", "error")
             raise
@@ -654,7 +673,7 @@ class ShellyProvider(BaseProvider):
                         ci = meter["ComponentIndex"]
                         if device["MetersSeperate"]:
                             if len(em_result_data) != device["Meters"] or len(emdata_result_data) != device["Meters"]:
-                                raise RuntimeError(f"{device['Label']}: EM1.GetStatus call count mismatch.")
+                                self._raise_runtime_error(f"{device['Label']}: EM1.GetStatus call count mismatch.")
                             meter["Power"] = abs(em_result_data[ci].get("act_power") or 0) or None
                             meter["Voltage"] = em_result_data[ci].get("voltage")
                             meter["Current"] = em_result_data[ci].get("current")
@@ -762,7 +781,7 @@ class ShellyProvider(BaseProvider):
                         device, f"relay/{device_output['ComponentIndex']}?turn={'on' if new_state else 'off'}"
                     )
                 else:
-                    raise RuntimeError(f"Unsupported protocol {device['Protocol']!r}.")
+                    self._raise_runtime_error(f"Unsupported protocol {device['Protocol']!r}.")
             except TimeoutError as e:
                 self.logger.log_message(f"Timeout changing output on {device['Label']}: {e}", "error")
                 raise
@@ -889,7 +908,7 @@ class ShellyProvider(BaseProvider):
             self._log_debug("Webhook server disabled.")
             return None
         if self._app_wake_event is None:
-            raise RuntimeError("app_wake_event required to start the webhook server.")
+            self._raise_runtime_error("app_wake_event required to start the webhook server.")
         try:
             server = ThreadingHTTPServer((DEFAULT_WEBHOOK_LISTEN, self.webhook_port), _ShellyWebhookHandler)  # pyright: ignore[reportArgumentType]
             server.app_wake_event = self._app_wake_event  # type: ignore[attr-defined]
@@ -979,7 +998,7 @@ class ShellyProvider(BaseProvider):
                 time.sleep(self.retry_delay)
         return False, {}
 
-    def _rpc_request(self, device: dict, payload: dict) -> tuple[bool, dict]:  # noqa: PLR0912, PLR0915
+    def _rpc_request(self, device: dict, payload: dict) -> tuple[bool, dict]:
         self._log_debug(f"RPC {device['Label']} → {payload.get('method')}")
         if not self.is_device_online(device):
             if not device.get("ExpectOffline"):
@@ -1105,9 +1124,11 @@ class ShellyProvider(BaseProvider):
             with model_file.open("r", encoding="utf-8") as f:
                 self.models = json.load(f)
         except FileNotFoundError as e:
-            raise RuntimeError(f"Could not find {SHELLY_MODEL_FILE} in package.") from e
+            msg = f"Could not find {SHELLY_MODEL_FILE} in package."
+            raise RuntimeError(msg) from e
         except json.JSONDecodeError as e:
-            raise RuntimeError(f"JSON error loading {SHELLY_MODEL_FILE}: {e}") from e
+            msg = f"JSON error loading {SHELLY_MODEL_FILE}: {e}"
+            raise RuntimeError(msg) from e
 
     def _log_debug(self, message: str) -> None:
         if self.allow_debug_logging:
@@ -1115,12 +1136,63 @@ class ShellyProvider(BaseProvider):
 
 # ── Internal — simulation file I/O ───────────────────────────────────────────
 
+    @staticmethod
+    def _get_simulation_file_path(device: dict) -> Path:
+        file_path = device["SimulationFile"]
+        if not isinstance(file_path, Path):
+            msg = f"No simulation file path for {device['Label']}."
+            raise RuntimeError(msg)  # noqa: TRY004
+        return file_path
+
+    def _merge_simulated_inputs(self, device_index: int, inputs: list[dict]) -> None:
+        for imported_input in inputs:
+            for input_component in self._inputs:
+                if (
+                    input_component["DeviceIndex"] == device_index
+                    and input_component["ComponentIndex"] == imported_input.get("ComponentIndex")
+                ):
+                    input_component["State"] = imported_input.get("State", input_component["State"])
+
+    def _merge_simulated_outputs(self, device: dict, device_index: int, outputs: list[dict]) -> None:
+        for imported_output in outputs:
+            for output_component in self._outputs:
+                if (
+                    output_component["DeviceIndex"] == device_index
+                    and output_component["ComponentIndex"] == imported_output.get("ComponentIndex")
+                ):
+                    output_component["State"] = imported_output.get("State", output_component["State"])
+                    if device["TemperatureMonitoring"]:
+                        output_component["Temperature"] = imported_output.get(
+                            "Temperature", output_component.get("Temperature")
+                        )
+
+    def _merge_simulated_meters(self, device_index: int, meters: list[dict]) -> None:
+        for imported_meter in meters:
+            for meter in self._meters:
+                if meter["DeviceIndex"] != device_index or meter["ComponentIndex"] != imported_meter.get("ComponentIndex"):
+                    continue
+                for key in ("Power", "Voltage", "Current", "PowerFactor", "Energy"):
+                    if key in imported_meter:
+                        meter[key] = imported_meter[key]
+                if meter.get("MockRate", 0) > 0:
+                    local_tz = DateHelper.get_local_timezone()
+                    elapsed = (DateHelper.now() - dt.datetime(2025, 1, 1, tzinfo=local_tz)).total_seconds()
+                    meter["Energy"] = meter["MockRate"] * elapsed
+
+    def _merge_simulated_temp_probes(self, device_index: int, temp_probes: list[dict]) -> None:
+        for imported_probe in temp_probes:
+            for temp_probe in self._temp_probes:
+                if (
+                    temp_probe["DeviceIndex"] == device_index
+                    and temp_probe["ComponentIndex"] == imported_probe.get("ComponentIndex")
+                ):
+                    temp_probe["Temperature"] = imported_probe.get("Temperature", temp_probe.get("Temperature"))
+                    temp_probe["LastReadingTime"] = DateHelper.now()
+
     def _export_device_information_to_json(self, device: dict) -> bool:
         if not device.get("Simulate"):
             return False
-        file_path: Path = device["SimulationFile"]
-        if not isinstance(file_path, Path):
-            raise RuntimeError(f"No simulation file path for {device['Label']}.")
+        file_path = self._get_simulation_file_path(device)
         try:
             info = self.get_device_information(device, refresh_status=False)
             file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1134,16 +1206,15 @@ class ShellyProvider(BaseProvider):
             self._log_debug(f"Simulation file written: {file_path}")
             return True
 
-    def _import_device_information_from_json(self, device: dict, create_if_no_file: bool) -> bool:  # noqa: PLR0912, PLR0915
+    def _import_device_information_from_json(self, device: dict, create_if_no_file: bool) -> bool:
         if not device.get("Simulate"):
             return False
-        file_path: Path = device["SimulationFile"]
-        if not isinstance(file_path, Path):
-            raise RuntimeError(f"No simulation file path for {device['Label']}.")
+        file_path = self._get_simulation_file_path(device)
         if not file_path.exists():
             if create_if_no_file:
                 return self._export_device_information_to_json(device)
-            raise RuntimeError(f"Simulation file {file_path} not found.")
+            msg = f"Simulation file {file_path} not found."
+            raise RuntimeError(msg)
         try:
             with file_path.open("r", encoding="utf-8") as f:
                 device_info = json.load(f)
@@ -1152,34 +1223,13 @@ class ShellyProvider(BaseProvider):
                 if key in device_info and key in device:
                     device[key] = device_info[key]
             if device_info.get("Inputs") and device["Inputs"] > 0:
-                for imp_inp in device_info["Inputs"]:
-                    for inp in self._inputs:
-                        if inp["DeviceIndex"] == device_index and inp["ComponentIndex"] == imp_inp.get("ComponentIndex"):
-                            inp["State"] = imp_inp.get("State", inp["State"])
+                self._merge_simulated_inputs(device_index, device_info["Inputs"])
             if device_info.get("Outputs") and device["Outputs"] > 0:
-                for imp_out in device_info["Outputs"]:
-                    for out in self._outputs:
-                        if out["DeviceIndex"] == device_index and out["ComponentIndex"] == imp_out.get("ComponentIndex"):
-                            out["State"] = imp_out.get("State", out["State"])
-                            if device["TemperatureMonitoring"]:
-                                out["Temperature"] = imp_out.get("Temperature", out.get("Temperature"))
+                self._merge_simulated_outputs(device, device_index, device_info["Outputs"])
             if device_info.get("Meters") and device["Meters"] > 0:
-                for imp_m in device_info["Meters"]:
-                    for meter in self._meters:
-                        if meter["DeviceIndex"] == device_index and meter["ComponentIndex"] == imp_m.get("ComponentIndex"):
-                            for k in ("Power", "Voltage", "Current", "PowerFactor", "Energy"):
-                                if k in imp_m:
-                                    meter[k] = imp_m[k]
-                            if meter.get("MockRate", 0) > 0:
-                                local_tz = DateHelper.get_local_timezone()
-                                elapsed = (DateHelper.now() - dt.datetime(2025, 1, 1, tzinfo=local_tz)).total_seconds()
-                                meter["Energy"] = meter["MockRate"] * elapsed
+                self._merge_simulated_meters(device_index, device_info["Meters"])
             if device_info.get("TempProbes") and device["TempProbes"] > 0:
-                for imp_tp in device_info["TempProbes"]:
-                    for tp in self._temp_probes:
-                        if tp["DeviceIndex"] == device_index and tp["ComponentIndex"] == imp_tp.get("ComponentIndex"):
-                            tp["Temperature"] = imp_tp.get("Temperature", tp.get("Temperature"))
-                            tp["LastReadingTime"] = DateHelper.now()
+                self._merge_simulated_temp_probes(device_index, device_info["TempProbes"])
             self._calculate_device_energy_totals(device)
             self._calculate_gen2_device_temp(device)
         except (OSError, json.JSONDecodeError, KeyError, RuntimeError) as e:
@@ -1192,7 +1242,8 @@ class ShellyProvider(BaseProvider):
 
 # ── Normalized snapshot helpers ──────────────────────────────────────────────
 
-    def _normalize_device(self, device: dict) -> dict:
+    @staticmethod
+    def _normalize_device(device: dict) -> dict:
         caps: set[DeviceCapability] = {DeviceCapability.POLLING}
         if device.get("Outputs", 0) > 0:
             caps.add(DeviceCapability.OUTPUT_CONTROL)
@@ -1220,7 +1271,8 @@ class ShellyProvider(BaseProvider):
             "Capabilities": caps,
         }
 
-    def _normalize_component(self, component: dict) -> dict:
+    @staticmethod
+    def _normalize_component(component: dict) -> dict:
         obj_type = component.get("ObjectType", "")
         base: dict = {
             "ID": component["ID"],

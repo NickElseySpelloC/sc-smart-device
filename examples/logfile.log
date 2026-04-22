@@ -1,0 +1,148 @@
+2026-04-22 16:14:58: SCSmartDevice initialized successfully with 3 devices.
+2026-04-22 16:15:28: SCSmartDevice initialized successfully with 3 devices.
+2026-04-22 16:15:28: 
+
+
+Testing basic functionality for device: Sydney Dev A
+2026-04-22 16:15:28: Device Sydney Dev A is online.
+2026-04-22 16:15:28: Sydney Dev A before output change:
+ Sydney Dev A (ID: 1) — online
+  Model: Shelly 2PM Gen3
+  Simulation: False
+  Hostname: 192.168.86.30:80
+  ExpectOffline: True
+  Generation: 3 / Protocol: RPC
+  Inputs (2):
+    [0] id=1 name='Sydney Dev A I1' state=False
+    [1] id=2 name='Sydney Dev A I2' state=False
+  Outputs (2):
+    [0] id=1 name='Sydney Dev A O1' state=True temp=51.8
+    [1] id=2 name='Sydney Dev A O2' state=False temp=51.8
+  Meters (2):
+    [0] id=1 name='Sydney Dev A M1' power=0.0W voltage=241.7V energy=102417.0Wh
+    [1] id=2 name='Sydney Dev A M2' power=0.0W voltage=241.7V energy=0.0Wh
+  TempProbes (0):
+  MAC: 30C9224E065C  Uptime: 1303419s  Temp: 51.8°C
+  TotalPower: 0W  TotalEnergy: 102417.0Wh
+  Supported Webhooks: 10
+    - input.toggle_on
+    - input.toggle_off
+    - input.button_push
+    - input.button_longpush
+    - input.button_doublepush
+    - input.button_triplepush
+    - input.analog_change
+    - input.analog_measurement
+    - switch.off
+    - switch.on
+  No installed webhooks found.
+2026-04-22 16:15:28: #1 Output status for Sydney Dev A O1: Is Online: True, Current State: True
+2026-04-22 16:15:28: Waiting 7 seconds before changing the output state...
+2026-04-22 16:15:38: SCSmartDevice initialized successfully with 3 devices.
+2026-04-22 16:15:38: Testing meter functionality for device: Sydney Panel EM1
+2026-04-22 16:15:38: Sydney Panel EM1 status:
+ Sydney Panel EM1 (ID: 3) — online
+  Model: Shelly EM Gen3
+  Simulation: False
+  Hostname: 192.168.86.44:80
+  ExpectOffline: False
+  Generation: 3 / Protocol: RPC
+  Inputs (0):
+  Outputs (1):
+    [0] id=5 name='Sydney Panel EM1 O1' state=False temp=58.5
+  Meters (2):
+    [0] id=5 name='Sydney Panel EM1 M1' power=243.3W voltage=243.8V energy=459830.37Wh
+    [1] id=6 name='Sydney Panel EM1 M2' power=9.3W voltage=243.8V energy=56325.83Wh
+  TempProbes (0):
+  MAC: 841FE891B238  Uptime: 1818920s  Temp: 58.5°C
+  TotalPower: 252.60000000000002W  TotalEnergy: 516156.2Wh
+  Supported Webhooks: 23
+    - bthomesensor.value_change
+    - bthomesensor.state_change
+    - bthomesensor.single_push
+    - bthomesensor.double_push
+    - bthomesensor.triple_push
+    - bthomesensor.long_push
+    - bthomesensor.long_double_push
+    - bthomesensor.long_triple_push
+    - bthomesensor.rotate_left
+    - bthomesensor.rotate_right
+    - boolean.change
+    - enum.change
+    - number.change
+    - text.change
+    - button.single_push
+    - button.double_push
+    - button.triple_push
+    - button.long_push
+    - switch.off
+    - switch.on
+    - em1.voltage_change
+    - em1.current_change
+    - em1.active_power_change
+  No installed webhooks found.
+2026-04-22 16:15:38: Sydney Panel EM1 O1 State: False.
+2026-04-22 16:15:38: Sydney Panel EM1 M1 Volts: 243.8, Power: 243.3, Energy: 459830.37.
+2026-04-22 16:15:38: Sydney Panel EM1 M2 Volts: 243.8, Power: 9.3, Energy: 56325.83.
+2026-04-22 16:15:39: Sydney Panel EM1 O1 State: False.
+2026-04-22 16:15:39: Sydney Panel EM1 M1 Volts: 243.6, Power: 247.9, Energy: 459830.37.
+2026-04-22 16:15:39: Sydney Panel EM1 M2 Volts: 243.7, Power: 9.2, Energy: 56325.83.
+2026-04-22 16:15:41: Sydney Panel EM1 O1 State: False.
+2026-04-22 16:15:41: Sydney Panel EM1 M1 Volts: 243.7, Power: 314.5, Energy: 459830.37.
+2026-04-22 16:15:41: Sydney Panel EM1 M2 Volts: 243.7, Power: 9.4, Energy: 56325.83.
+2026-04-22 16:15:42: Sydney Panel EM1 O1 State: False.
+2026-04-22 16:15:42: Sydney Panel EM1 M1 Volts: 243.8, Power: 249.3, Energy: 459830.37.
+2026-04-22 16:15:42: Sydney Panel EM1 M2 Volts: 243.8, Power: 9.5, Energy: 56325.83.
+2026-04-22 16:15:43: Sydney Panel EM1 O1 State: False.
+2026-04-22 16:15:43: Sydney Panel EM1 M1 Volts: 243.9, Power: 243.5, Energy: 459830.37.
+2026-04-22 16:15:43: Sydney Panel EM1 M2 Volts: 243.9, Power: 9.9, Energy: 56325.83.
+2026-04-22 16:15:48: SCSmartDevice initialized successfully with 3 devices.
+2026-04-22 16:15:48: 
+
+
+Testing temperature functionality for device: Sydney Solar
+2026-04-22 16:15:48: Refreshing device statuses... (Loop 1/20)
+2026-04-22 16:15:49: Sydney Solar Temperature: None°C.
+2026-04-22 16:15:49: Sydney Dev A O1 State: True.
+2026-04-22 16:15:49:     Temp Roof (ID: None) reading: None°C last updated at 2026-04-22 16:15:48.860554+10:00
+2026-04-22 16:15:49:     Temp Pool Water (ID: None) reading: None°C last updated at 2026-04-22 16:15:48.861316+10:00
+2026-04-22 16:15:49:     Sydney Solar Internal Probe reading: None°C
+2026-04-22 16:15:56: SCSmartDevice initialized successfully with 3 devices.
+2026-04-22 16:15:56: 
+
+
+Testing SmartDeviceView for device: Sydney Dev A
+2026-04-22 16:15:56: Device Sydney Dev A is online.
+2026-04-22 16:15:56: Sydney Dev A before output change:
+ Sydney Dev A (ID: 1) — online
+  Model: Shelly 2PM Gen3
+  Simulation: False
+  Hostname: 192.168.86.30:80
+  ExpectOffline: True
+  Generation: 3 / Protocol: RPC
+  Inputs (2):
+    [0] id=1 name='Sydney Dev A I1' state=False
+    [1] id=2 name='Sydney Dev A I2' state=False
+  Outputs (2):
+    [0] id=1 name='Sydney Dev A O1' state=True temp=52.0
+    [1] id=2 name='Sydney Dev A O2' state=False temp=52.0
+  Meters (2):
+    [0] id=1 name='Sydney Dev A M1' power=0.0W voltage=242.1V energy=102417.0Wh
+    [1] id=2 name='Sydney Dev A M2' power=0.0W voltage=242.2V energy=0.0Wh
+  TempProbes (0):
+  MAC: 30C9224E065C  Uptime: 1303447s  Temp: 52.0°C
+  TotalPower: 0W  TotalEnergy: 102417.0Wh
+  Supported Webhooks: 10
+    - input.toggle_on
+    - input.toggle_off
+    - input.button_push
+    - input.button_longpush
+    - input.button_doublepush
+    - input.button_triplepush
+    - input.analog_change
+    - input.analog_measurement
+    - switch.off
+    - switch.on
+  No installed webhooks found.
+2026-04-22 16:15:56: #1 Output status for Sydney Dev A O1: Is Online: True, Current State: True
+2026-04-22 16:15:56: Waiting 7 seconds before changing the output state...

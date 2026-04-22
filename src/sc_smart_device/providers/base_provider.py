@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from sc_smart_device.models.smart_device_status import SmartDeviceStatus
+if TYPE_CHECKING:
+    from sc_smart_device.models.smart_device_status import SmartDeviceStatus
 
 
 class BaseProvider(ABC):

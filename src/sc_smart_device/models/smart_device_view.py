@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-import datetime as dt
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NoReturn
 
 if TYPE_CHECKING:
+    import datetime as dt
+
     from sc_smart_device.models.smart_device_status import SmartDeviceStatus
 
 
@@ -51,6 +52,10 @@ class SmartDeviceView:
     def _build_id_index(items: list[dict[str, Any]]) -> dict[int, dict[str, Any]]:
         return {item["ID"]: item for item in items if "ID" in item}
 
+    @staticmethod
+    def _raise_index_error(message: str) -> NoReturn:
+        raise IndexError(message)
+
     # ── Device lookups ──────────────────────────────────────────────────────
 
     def get_device_id_list(self) -> list[int]:
@@ -69,22 +74,22 @@ class SmartDeviceView:
 
     def get_device_name(self, device_id: int) -> str:
         if device_id not in self._devices_by_id:
-            raise IndexError(f"Invalid device ID: {device_id}")
+            self._raise_index_error(f"Invalid device ID: {device_id}")
         return str(self._devices_by_id[device_id]["Name"])
 
     def get_device_online(self, device_id: int) -> bool:
         if device_id not in self._devices_by_id:
-            raise IndexError(f"Invalid device ID: {device_id}")
+            self._raise_index_error(f"Invalid device ID: {device_id}")
         return bool(self._devices_by_id[device_id].get("Online", False))
 
     def get_device_expect_offline(self, device_id: int) -> bool:
         if device_id not in self._devices_by_id:
-            raise IndexError(f"Invalid device ID: {device_id}")
+            self._raise_index_error(f"Invalid device ID: {device_id}")
         return bool(self._devices_by_id[device_id].get("ExpectOffline", False))
 
     def get_device_temperature(self, device_id: int) -> float | None:
         if device_id not in self._devices_by_id:
-            raise IndexError(f"Invalid device ID: {device_id}")
+            self._raise_index_error(f"Invalid device ID: {device_id}")
         val = self._devices_by_id[device_id].get("Temperature")
         if val is None:
             return None
@@ -120,7 +125,7 @@ class SmartDeviceView:
 
     def get_output_state(self, output_id: int) -> bool:
         if output_id not in self._outputs_by_id:
-            raise IndexError(f"Invalid output ID: {output_id}")
+            self._raise_index_error(f"Invalid output ID: {output_id}")
         device_id = self.get_output_device_id(output_id)
         if not self.get_device_online(device_id):
             return False
@@ -128,7 +133,7 @@ class SmartDeviceView:
 
     def get_output_device_id(self, output_id: int) -> int:
         if output_id not in self._outputs_by_id:
-            raise IndexError(f"Invalid output ID: {output_id}")
+            self._raise_index_error(f"Invalid output ID: {output_id}")
         return int(self._outputs_by_id[output_id].get("DeviceID", 0))
 
     # ── Input lookups ───────────────────────────────────────────────────────
@@ -138,7 +143,7 @@ class SmartDeviceView:
 
     def get_input_state(self, input_id: int) -> bool:
         if input_id not in self._inputs_by_id:
-            raise IndexError(f"Invalid input ID: {input_id}")
+            self._raise_index_error(f"Invalid input ID: {input_id}")
         return bool(self._inputs_by_id[input_id].get("State", False))
 
     # ── Meter lookups ───────────────────────────────────────────────────────
@@ -148,7 +153,7 @@ class SmartDeviceView:
 
     def get_meter_energy(self, meter_id: int) -> float:
         if meter_id not in self._meters_by_id:
-            raise IndexError(f"Invalid meter ID: {meter_id}")
+            self._raise_index_error(f"Invalid meter ID: {meter_id}")
         val = self._meters_by_id[meter_id].get("Energy", 0) or 0
         try:
             return float(val)
@@ -157,7 +162,7 @@ class SmartDeviceView:
 
     def get_meter_power(self, meter_id: int) -> float:
         if meter_id not in self._meters_by_id:
-            raise IndexError(f"Invalid meter ID: {meter_id}")
+            self._raise_index_error(f"Invalid meter ID: {meter_id}")
         val = self._meters_by_id[meter_id].get("Power", 0) or 0
         try:
             return float(val)
@@ -171,7 +176,7 @@ class SmartDeviceView:
 
     def get_temp_probe_temperature(self, temp_probe_id: int) -> float | None:
         if temp_probe_id not in self._temp_probes_by_id:
-            raise IndexError(f"Invalid temperature probe ID: {temp_probe_id}")
+            self._raise_index_error(f"Invalid temperature probe ID: {temp_probe_id}")
         val = self._temp_probes_by_id[temp_probe_id].get("Temperature")
         if val is None:
             return None
@@ -182,5 +187,5 @@ class SmartDeviceView:
 
     def get_temp_probe_reading_time(self, temp_probe_id: int) -> dt.datetime | None:
         if temp_probe_id not in self._temp_probes_by_id:
-            raise IndexError(f"Invalid temperature probe ID: {temp_probe_id}")
+            self._raise_index_error(f"Invalid temperature probe ID: {temp_probe_id}")
         return self._temp_probes_by_id[temp_probe_id].get("LastReadingTime")

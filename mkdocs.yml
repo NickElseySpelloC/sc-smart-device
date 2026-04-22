@@ -19,4 +19,8 @@ plugins:
 
 nav:
   - Home: index.md
+  - API Reference:
+      - SCSmartDevice: sc_smart_device.md
+      - SmartDeviceView: sc_smart_device_view.md
+      - SmartDeviceWorker: sc_smart_device_worker.md
 
