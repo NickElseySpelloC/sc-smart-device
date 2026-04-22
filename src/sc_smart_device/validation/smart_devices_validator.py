@@ -4,11 +4,15 @@ Client apps should merge this into their own validation schema and pass the comb
 schema to SCConfigManager so the full config file is validated in one pass.
 
 Example::
+    from mergedeep import merge
 
+    from my_validation_schema import smart_devices_extra_attrib
     from sc_smart_device import smart_devices_validator
-    from sc_foundation import SCConfigManager, yaml_config_validation
+    from sc_foundation import SCConfigManager
 
-    merged_schema = {**yaml_config_validation, **smart_devices_validator}
+    merged_schema = merge({}, smart_devices_validator, smart_devices_extra_attrib)
+    assert isinstance(merged_schema, dict), "Merged schema should be type dict"
+
     config = SCConfigManager(
         config_file="config.yaml",
         validation_schema=merged_schema,

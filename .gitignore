@@ -29,3 +29,5 @@ development/*.yaml
 src/*.json
 src/*.csv
 src/*.log
+development/*.log
+development/*.yaml

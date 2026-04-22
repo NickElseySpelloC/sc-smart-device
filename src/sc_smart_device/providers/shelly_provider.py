@@ -273,27 +273,47 @@ class ShellyProvider(BaseProvider):
                 return_str += f"  Hostname: {device['Hostname']}:{device['Port']}\n"
                 return_str += f"  ExpectOffline: {device['ExpectOffline']}\n"
                 return_str += f"  Generation: {device['Generation']} / Protocol: {device['Protocol']}\n"
+                for ck in device.get("customkeylist", []):
+                    return_str += f"  {ck}: {device[ck]}\n"
                 return_str += f"  Inputs ({device['Inputs']}):\n"
                 for inp in self._inputs:
                     if inp["DeviceIndex"] == idx:
-                        return_str += f"    [{inp['ComponentIndex']}] id={inp['ID']} name={inp['Name']!r} state={inp['State']}\n"
+                        custom = ", ".join(f"{k}: {inp[k]}" for k in inp.get("customkeylist", []))
+                        return_str += f"    [{inp['ComponentIndex']}] id={inp['ID']} name={inp['Name']!r} state={inp['State']}"
+                        return_str += (f", {custom}" if custom else "") + "\n"
                 return_str += f"  Outputs ({device['Outputs']}):\n"
                 for out in self._outputs:
                     if out["DeviceIndex"] == idx:
-                        return_str += f"    [{out['ComponentIndex']}] id={out['ID']} name={out['Name']!r} state={out['State']} temp={out['Temperature']}\n"
+                        custom = ", ".join(f"{k}: {out[k]}" for k in out.get("customkeylist", []))
+                        return_str += f"    [{out['ComponentIndex']}] id={out['ID']} name={out['Name']!r} state={out['State']} temp={out['Temperature']}"
+                        return_str += (f", {custom}" if custom else "") + "\n"
                 return_str += f"  Meters ({device['Meters']}):\n"
                 for m in self._meters:
                     if m["DeviceIndex"] == idx:
+                        custom = ", ".join(f"{k}: {m[k]}" for k in m.get("customkeylist", []))
                         return_str += (
                             f"    [{m['ComponentIndex']}] id={m['ID']} name={m['Name']!r} "
-                            f"power={m['Power']}W voltage={m['Voltage']}V energy={m['Energy']}Wh\n"
+                            f"power={m['Power']}W voltage={m['Voltage']}V energy={m['Energy']}Wh"
                         )
+                        return_str += (f", {custom}" if custom else "") + "\n"
                 return_str += f"  TempProbes ({device['TempProbes']}):\n"
                 for tp in self._temp_probes:
                     if tp["DeviceIndex"] == idx:
-                        return_str += f"    [{tp['ComponentIndex']}] id={tp['ID']} name={tp['Name']!r} temp={tp['Temperature']}°C\n"
+                        return_str += f"    [{tp['ComponentIndex']}] id={tp['ID']} name={tp['Name']!r} temp={tp['Temperature']}°C  last_read={tp['LastReadingTime']}\n"
                 return_str += f"  MAC: {device['MacAddress']}  Uptime: {device['Uptime']}s  Temp: {device['Temperature']}°C\n"
                 return_str += f"  TotalPower: {device['TotalPower']}W  TotalEnergy: {device['TotalEnergy']}Wh\n"
+                if device["SupportedWebhooks"]:
+                    return_str += f"  Supported Webhooks: {len(device['SupportedWebhooks'])}\n"
+                    for wh in device["SupportedWebhooks"]:
+                        return_str += f"    - {wh.get('name')}\n"
+                    if device["InstalledWebhooks"]:
+                        return_str += f"  Installed Webhooks: {len(device['InstalledWebhooks'])}\n"
+                        for wh in device["InstalledWebhooks"]:
+                            return_str += f"    - {wh.get('name')}\n"
+                    else:
+                        return_str += "  No installed webhooks found.\n"
+                else:
+                    return_str += "  Webhooks not supported on this device.\n"
         except RuntimeError as e:
             raise RuntimeError(e) from e
         return return_str.strip()
@@ -826,7 +846,10 @@ class ShellyProvider(BaseProvider):
                 if not device.get("Online"):
                     device["WebhookInstallPending"] = True
                 continue
-            self._rpc_request(device, {"id": 0, "method": "Webhook.DeleteAll"})
+            result, result_data = self._rpc_request(device, {"id": 0, "method": "Webhook.DeleteAll"})
+            if not result:
+                self.logger.log_message(f"Failed to delete existing webhooks for {device.get('Name')}: {result_data}", "error")
+                continue
             for component in self._inputs + self._outputs + self._meters:
                 if component["DeviceIndex"] != device["Index"] or not component.get("Webhooks"):
                     continue
