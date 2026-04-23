@@ -14,7 +14,7 @@
         <link rel="prev" href="..">
       
       
-        <link rel="next" href="../objects/">
+        <link rel="next" href="../example_code/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Configuration - Spello Consulting Smart Device Library</title>
+        <title>Example Config - Spello Consulting Smart Device Library</title>
       
     
     
@@ -49,6 +49,8 @@
     
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -104,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Configuration
+              Example Config
             
           </span>
         </div>
@@ -243,7 +245,7 @@
   <span class="md-ellipsis">
     
   
-    Configuration
+    Example Config
   
 
     
@@ -261,7 +263,7 @@
   <span class="md-ellipsis">
     
   
-    Configuration
+    Example Config
   
 
     
@@ -347,10 +349,48 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#custom-attrbutes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Attrbutes
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../example_code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Example Code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -415,6 +455,60 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../shelly_temp_probes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shelly Temperature Probes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../shelly_webhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shelly Webhooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -426,10 +520,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -447,8 +541,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -636,6 +730,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#custom-attrbutes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Attrbutes
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -694,7 +799,9 @@
         Outputs:
           - Name: &quot;Sydney Dev A O1&quot;
             Webhooks: True
+            Group: &quot;Living Room&quot;
           - Name: &quot;Sydney Dev A O2&quot;
+            Group: &quot;Living Room&quot;
         Meters:
           - Name: &quot;Sydney Dev A M1&quot;
           - Name: &quot;Sydney Dev A M2&quot;
@@ -802,6 +909,9 @@
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p>Please see the <a href="../shelly_webhooks/">Shelly Webhooks page</a> for more information.</p>
+</blockquote>
 <h3 id="devices-key">Devices key</h3>
 <p>The Devices key in the configuration block supports the following keys:</p>
 <table>
@@ -864,6 +974,60 @@
 <h2 id="tasmota-device-components">Tasmota device components</h2>
 <p>Due to the very large range of Tasmota devices on the market, it's not possible to maintain a library reference of each model and the type &amp; number of components each model supports. </p>
 <p>Therefore, you <strong>must</strong> configure each componenet in your YAML configuration as this will dictate the capabilities of the device.</p>
+<h2 id="custom-attrbutes">Custom Attrbutes</h2>
+<p>You can add custom key/values to Devices, Inputs, Outputs and Meters if needed. For example you could add a Group name to each output switch:</p>
+<pre><code class="language-yaml">SCSmartDevices:
+  ...
+  Devices:
+    - Name: Downstairs Lights
+      Model: Shelly2PMG3
+      Hostname: 192.168.1.23
+      ID: 100
+      Inputs:
+        - Name: &quot;Living Room Switch&quot;
+          Webhooks: True
+        - Name: &quot;Kitchen Switch&quot;
+          Webhooks: True
+      Outputs:
+        - Name: &quot;Living Room Relay&quot;
+          Group: Inside
+        - Name: &quot;Kitchen Relay&quot;
+          Group: Inside
+    - Name: Outside Lights
+      Model: Shelly2PMG3
+      Hostname: 192.168.1.25
+      ID: 200
+      Inputs:
+        - Name: &quot;Patio Switch&quot;
+          Group: Outside
+        - Name: &quot;Car Port Switch&quot;
+          Group: Outside
+      Outputs:
+        - Name: &quot;Patio Relay&quot;
+        - Name: &quot;Car Port Relay&quot;
+    - Name: Testing
+      ...
+</code></pre>
+<p>If you add custom attributes, you will need to include them in yoour Ceribus validation dict passed to SCConfigManager(). This will be merged in with the default validation structure:</p>
+<pre><code class="language-python">    &quot;SCSmartDevices&quot;: {
+        &quot;schema&quot;: {
+            &quot;Devices&quot;: {
+                &quot;schema&quot;: {
+                    &quot;schema&quot;: {
+                        &quot;Outputs&quot;: {
+                            &quot;schema&quot;: {
+                                &quot;schema&quot;: {
+                                    &quot;Group&quot;: {&quot;type&quot;: &quot;string&quot;, &quot;required&quot;: False, &quot;nullable&quot;: True},
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    }
+</code></pre>
+<p>These custom attrbutes will be printed by the print_device_status() function and available from the get_**() functions.</p>
 
 
 
