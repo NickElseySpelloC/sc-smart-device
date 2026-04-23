@@ -587,8 +587,14 @@
 
 
   def main():  # noqa: PLR0914, PLR0915
-      device_identity = &quot;Sydney Dev A&quot;
-      output_identity = &quot;Sydney Dev A O1&quot;
+      # ------- Uncomment the relevant section below to test different devices and meters -------
+      # Test a Shelly switch
+      # device_identity = &quot;Sydney Dev A&quot;
+      # output_identity = &quot;Sydney Dev A O1&quot;
+
+      # Test a Tasmota switch
+      device_identity = &quot;Sydney Dev B&quot;
+      output_identity = &quot;Sydney Dev B O1&quot;
 
       loop_delay = 5
       loop_count = 0
@@ -660,32 +666,35 @@
       print(f&quot;Output {output_identity} changed: {did_change}, Result: {result}&quot;)
 
       # Loop and listed for webhook events
-      while loop_count &lt; max_loops:  # noqa: PLR1702
-          print(f&quot;Starting loop {loop_count + 1}/{max_loops}&quot;)
+      if smart_switch_control.does_device_have_webhooks(device):  # noqa: PLR1702
+          while loop_count &lt; max_loops:
+              print(f&quot;Starting loop {loop_count + 1}/{max_loops}&quot;)
 
-          # Do application stuff here
+              # Do application stuff here
 
-          # Wait for a webhook event or timeout
-          wake_event.wait(timeout=loop_delay)
-          if wake_event.is_set():
-              try:
-                  # We were woken by a webhook call
-                  event = smart_switch_control.pull_webhook_event()
-                  if event:
-                      print(f&quot;Received webhook event: {event.get('Event')}&quot;)
-                      if event.get(&quot;Event&quot;) in {&quot;input.toggle_on&quot;, &quot;input.toggle_off&quot;}:
-                          # An input was toggled on/off, change the corresponding output
-                          output_identity = event.get(&quot;Component&quot;)
-                          if not output_identity:
-                              print(f&quot;Unable to get component object for event: {event}&quot;, file=sys.stderr)
-                              continue
-                          new_state = event.get(&quot;Event&quot;) == &quot;input.toggle_on&quot;
-                          result, did_change = smart_switch_control.change_output(output_identity, new_state)
-                          print(f&quot;Output {output_identity} changed: {did_change}, Result: {result}&quot;)
-              except (AttributeError, RuntimeError) as e:
-                  print(f&quot;Error processing webhook event: {e}&quot;, file=sys.stderr)
-              wake_event.clear()
-          loop_count += 1
+              # Wait for a webhook event or timeout
+              wake_event.wait(timeout=loop_delay)
+              if wake_event.is_set():
+                  try:
+                      # We were woken by a webhook call
+                      event = smart_switch_control.pull_webhook_event()
+                      if event:
+                          print(f&quot;Received webhook event: {event.get('Event')}&quot;)
+                          if event.get(&quot;Event&quot;) in {&quot;input.toggle_on&quot;, &quot;input.toggle_off&quot;}:
+                              # An input was toggled on/off, change the corresponding output
+                              output_identity = event.get(&quot;Component&quot;)
+                              if not output_identity:
+                                  print(f&quot;Unable to get component object for event: {event}&quot;, file=sys.stderr)
+                                  continue
+                              new_state = event.get(&quot;Event&quot;) == &quot;input.toggle_on&quot;
+                              result, did_change = smart_switch_control.change_output(output_identity, new_state)
+                              print(f&quot;Output {output_identity} changed: {did_change}, Result: {result}&quot;)
+                  except (AttributeError, RuntimeError) as e:
+                      print(f&quot;Error processing webhook event: {e}&quot;, file=sys.stderr)
+                  wake_event.clear()
+              loop_count += 1
+      else:
+          print(f&quot;Device {device_identity} does not have webhooks enabled. Skipping webhook event loop.&quot;)
 
 
   if __name__ == &quot;__main__&quot;:

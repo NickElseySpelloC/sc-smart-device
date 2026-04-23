@@ -1244,6 +1244,9 @@
 
 
         <p>Unified smart-device controller.</p>
+<p>Aggregates one or more hardware providers (currently :class:<code>ShellyProvider</code>
+and :class:<code>TasmotaProvider</code>) behind a single, stable public API.  Client
+apps should never depend on a provider class directly.</p>
 
 
 
@@ -2000,7 +2003,7 @@ client apps require minimal changes.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Gets the timezone and location of a Shelly device if available.</p>
+        <p>Gets the timezone and location of a device if available.</p>
 
 
 <details class="returns-a-dict-in-the-following-format" open>
@@ -2112,7 +2115,7 @@ client apps require minimal changes.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Gets the status of a Shelly device.</p>
+        <p>Gets the status of a device.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2613,7 +2616,7 @@ to safely read device state without holding a lock.</p>
             <td>
               <div class="doc-md-description">
                 <p>The actual device object, device component object,
-        device ID or device name of the device to check. If None, checks all device.</p>
+        device ID or device name of the device to check. If None, checks all devices.</p>
               </div>
             </td>
             <td>
@@ -2780,7 +2783,7 @@ to safely read device state without holding a lock.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Prints the Shelly model library.</p>
+        <p>Prints the model library for all providers that have one.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2845,7 +2848,7 @@ to safely read device state without holding a lock.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A string representation of the Shelly model library.</p>
+                <p>A string representation of the model library.</p>
               </div>
             </td>
           </tr>
@@ -2869,8 +2872,6 @@ to safely read device state without holding a lock.</p>
     <div class="doc doc-contents ">
 
         <p>Return the oldest queued webhook event and remove it from the queue.</p>
-<p>Use this if your app has been interrupted by a webhook event (your app_wake_event was set).
-This will return the earliest webhook event that was received and remove it from the queue.</p>
 
 
     <p><span class="doc-section-title">Returns:</span></p>
@@ -2939,9 +2940,7 @@ This will return the earliest webhook event that was received and remove it from
 
     <div class="doc doc-contents ">
 
-        <p>Refreshes the status of all Shelly devices.</p>
-<p>This function iterates through all devices and updates their status by calling get_device_status.
-It also calculates the total power and energy consumption for each device.</p>
+        <p>Refreshes the status of all devices across all providers.</p>
 
 
 <p><span class="doc-section-title">Raises:</span></p>
@@ -2982,7 +2981,7 @@ It also calculates the total power and energy consumption for each device.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Stop the webhook server and release all resources.</p>
+        <p>Stop all provider services and release resources.</p>
 <p>Call this when the client application is terminating.</p>
 
 
