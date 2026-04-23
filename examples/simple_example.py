@@ -14,8 +14,14 @@ CONFIG_FILE = "examples/switch_config.yaml"
 
 
 def main():  # noqa: PLR0914, PLR0915
-    device_identity = "Sydney Dev A"
-    output_identity = "Sydney Dev A O1"
+    # ------- Uncomment the relevant section below to test different devices and meters -------
+    # Test a Shelly switch
+    # device_identity = "Sydney Dev A"
+    # output_identity = "Sydney Dev A O1"
+
+    # Test a Tasmota switch
+    device_identity = "Sydney Dev B"
+    output_identity = "Sydney Dev B O1"
 
     loop_delay = 5
     loop_count = 0
@@ -87,32 +93,35 @@ def main():  # noqa: PLR0914, PLR0915
     print(f"Output {output_identity} changed: {did_change}, Result: {result}")
 
     # Loop and listed for webhook events
-    while loop_count < max_loops:  # noqa: PLR1702
-        print(f"Starting loop {loop_count + 1}/{max_loops}")
+    if smart_switch_control.does_device_have_webhooks(device):  # noqa: PLR1702
+        while loop_count < max_loops:
+            print(f"Starting loop {loop_count + 1}/{max_loops}")
 
-        # Do application stuff here
+            # Do application stuff here
 
-        # Wait for a webhook event or timeout
-        wake_event.wait(timeout=loop_delay)
-        if wake_event.is_set():
-            try:
-                # We were woken by a webhook call
-                event = smart_switch_control.pull_webhook_event()
-                if event:
-                    print(f"Received webhook event: {event.get('Event')}")
-                    if event.get("Event") in {"input.toggle_on", "input.toggle_off"}:
-                        # An input was toggled on/off, change the corresponding output
-                        output_identity = event.get("Component")
-                        if not output_identity:
-                            print(f"Unable to get component object for event: {event}", file=sys.stderr)
-                            continue
-                        new_state = event.get("Event") == "input.toggle_on"
-                        result, did_change = smart_switch_control.change_output(output_identity, new_state)
-                        print(f"Output {output_identity} changed: {did_change}, Result: {result}")
-            except (AttributeError, RuntimeError) as e:
-                print(f"Error processing webhook event: {e}", file=sys.stderr)
-            wake_event.clear()
-        loop_count += 1
+            # Wait for a webhook event or timeout
+            wake_event.wait(timeout=loop_delay)
+            if wake_event.is_set():
+                try:
+                    # We were woken by a webhook call
+                    event = smart_switch_control.pull_webhook_event()
+                    if event:
+                        print(f"Received webhook event: {event.get('Event')}")
+                        if event.get("Event") in {"input.toggle_on", "input.toggle_off"}:
+                            # An input was toggled on/off, change the corresponding output
+                            output_identity = event.get("Component")
+                            if not output_identity:
+                                print(f"Unable to get component object for event: {event}", file=sys.stderr)
+                                continue
+                            new_state = event.get("Event") == "input.toggle_on"
+                            result, did_change = smart_switch_control.change_output(output_identity, new_state)
+                            print(f"Output {output_identity} changed: {did_change}, Result: {result}")
+                except (AttributeError, RuntimeError) as e:
+                    print(f"Error processing webhook event: {e}", file=sys.stderr)
+                wake_event.clear()
+            loop_count += 1
+    else:
+        print(f"Device {device_identity} does not have webhooks enabled. Skipping webhook event loop.")
 
 
 if __name__ == "__main__":

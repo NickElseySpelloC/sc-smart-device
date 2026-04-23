@@ -8,6 +8,17 @@ from switch_init import switch_init
 
 from sc_smart_device import SCSmartDevice, SmartDeviceView
 
+# ------- Uncomment the relevant section below to test different devices and meters -------
+# Test a Shelly switch
+device_name = "Sydney Dev A"
+output_name = "Sydney Dev A O1"
+meter_name = "Sydney Dev A M1"
+
+# Test a Tasmota switch
+# device_name = "Sydney Dev B"
+# output_name = "Sydney Dev B O1"
+# meter_name = "Sydney Dev B M1"
+
 
 def test_view(logger: SCLogger, smart_switch_control: SCSmartDevice) -> None:
     """Test function demonstrating SmartDeviceView for reading device state.
@@ -20,10 +31,6 @@ def test_view(logger: SCLogger, smart_switch_control: SCSmartDevice) -> None:
       2. Call get_view() to take a new frozen snapshot
       3. Read all state from the view (no dict access needed)
     """
-    device_name = "Sydney Dev A"
-    output_name = "Sydney Dev A O1"
-    meter_name = "Sydney Dev A M1"
-
     logger.log_message(f"\n\n\nTesting SmartDeviceView for device: {device_name}", "summary")
 
     # ── Initial status refresh ───────────────────────────────────────────────
@@ -63,8 +70,8 @@ def test_view(logger: SCLogger, smart_switch_control: SCSmartDevice) -> None:
     )
 
     # ── Output change (control still goes through smart_switch_control) ──────
-    logger.log_message("Waiting 7 seconds before changing the output state...", "detailed")
-    for i in range(7):
+    logger.log_message("Waiting 3 seconds before changing the output state...", "detailed")
+    for i in range(3):
         time.sleep(1)
         print(f"{i + 1}...", end="", flush=True)
     print()
@@ -98,7 +105,7 @@ def test_view(logger: SCLogger, smart_switch_control: SCSmartDevice) -> None:
 
 def main():
     """Main function to run the SmartDeviceView example."""
-    print(f"Hello from sc-smart-device running on {platform.system()}")
+    print(f"Hello from switch_view running on {platform.system()}")
 
     try:
         _config, logger, smart_switch_control = switch_init()

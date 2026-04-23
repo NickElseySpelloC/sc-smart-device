@@ -43,6 +43,20 @@ SCSmartDevices:
       Meters:
         - Name: "Sydney Dev A M1"
         - Name: "Sydney Dev A M2"
+      TempProbes:
+        - Name: "Sydney Dev A"
+    - Name: Sydney Dev B
+      Model: Tasmota
+      Hostname: 192.168.86.37
+      Simulate: False
+      ExpectOffline: True
+      Outputs:
+        - Name: "Sydney Dev B O1"
+          Group: "Dining Room"
+      Meters:
+        - Name: "Sydney Dev B M1"
+      TempProbes:
+        - Name: "Sydney Dev B"        
     - Name: Sydney Solar
       Model: Shelly2PMG3
       Hostname: 192.168.86.35

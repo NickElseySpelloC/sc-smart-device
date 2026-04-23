@@ -805,6 +805,20 @@
         Meters:
           - Name: &quot;Sydney Dev A M1&quot;
           - Name: &quot;Sydney Dev A M2&quot;
+        TempProbes:
+          - Name: &quot;Sydney Dev A&quot;
+      - Name: Sydney Dev B
+        Model: Tasmota
+        Hostname: 192.168.86.37
+        Simulate: False
+        ExpectOffline: True
+        Outputs:
+          - Name: &quot;Sydney Dev B O1&quot;
+            Group: &quot;Dining Room&quot;
+        Meters:
+          - Name: &quot;Sydney Dev B M1&quot;
+        TempProbes:
+          - Name: &quot;Sydney Dev B&quot;        
       - Name: Sydney Solar
         Model: Shelly2PMG3
         Hostname: 192.168.86.35

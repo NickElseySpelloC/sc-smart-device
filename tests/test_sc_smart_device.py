@@ -211,11 +211,11 @@ def test_get_view_returns_smart_device_view():
 
 
 def test_view_device_id_list():
-    """View should list all configured device IDs."""
+    """View should list all configured device IDs (Shelly + Tasmota)."""
     view = smart_device.get_view()
     id_list = view.get_device_id_list()
     assert isinstance(id_list, list), "get_device_id_list() should return a list"
-    assert len(id_list) == 1, "Should have exactly one device"
+    assert len(id_list) == 2, "Should have exactly two devices (one Shelly, one Tasmota)"
     assert DEVICE_ID in id_list, f"Device ID {DEVICE_ID} should be in the list"
 
 
@@ -269,16 +269,20 @@ def test_view_device_expect_offline():
 
 
 def test_view_get_json_snapshot():
-    """get_json_snapshot() should return a dict with all component lists."""
+    """get_json_snapshot() should return a dict with all component lists.
+
+    With the test config: 1 Shelly device (2 inputs, 2 outputs, 2 meters)
+    + 1 Tasmota device (0 inputs, 1 output, 1 meter) = 2 devices total.
+    """
     view = smart_device.get_view()
     snapshot = view.get_json_snapshot()
     assert isinstance(snapshot, dict), "get_json_snapshot() should return a dict"
     for key in ("devices", "outputs", "inputs", "meters", "temp_probes"):
         assert key in snapshot, f"Snapshot should contain '{key}'"
-    assert len(snapshot["devices"]) == 1, "Snapshot should contain one device"
-    assert len(snapshot["inputs"]) == 2, "Snapshot should contain 2 inputs"
-    assert len(snapshot["outputs"]) == 2, "Snapshot should contain 2 outputs"
-    assert len(snapshot["meters"]) == 2, "Snapshot should contain 2 meters"
+    assert len(snapshot["devices"]) == 2, "Snapshot should contain 2 devices"
+    assert len(snapshot["inputs"]) == 2, "Snapshot should contain 2 inputs (Shelly only)"
+    assert len(snapshot["outputs"]) == 3, "Snapshot should contain 3 outputs (2 Shelly + 1 Tasmota)"
+    assert len(snapshot["meters"]) == 3, "Snapshot should contain 3 meters (2 Shelly + 1 Tasmota)"
 
 
 def test_view_output_id_lookup():
@@ -526,3 +530,155 @@ def test_view_get_meter_value_invalid_id():
     view = smart_device.get_view()
     with pytest.raises(IndexError):
         view.get_meter_value(999, "Power")
+
+
+# ── Tasmota device tests ─────────────────────────────────────────────────────
+
+TASMOTA_DEVICE_NAME = "Device Test 2"
+TASMOTA_DEVICE_ID = 2
+TASMOTA_OUTPUT_NAME = "Device 2.Output 1"
+TASMOTA_OUTPUT_ID = 3   # Auto-assigned: Shelly outputs claim IDs 1 & 2, so next available is 3
+TASMOTA_METER_NAME = "Device 2.Meter 1"
+TASMOTA_METER_ID = 3    # Auto-assigned: Shelly meters claim IDs 1 & 2, so next available is 3
+
+
+def test_tasmota_device_found():
+    """Tasmota device should be discoverable via get_device() by name and ID."""
+    device = smart_device.get_device(TASMOTA_DEVICE_NAME)
+    assert device is not None, "Tasmota device should be found by name"
+    assert device.get("ID") == TASMOTA_DEVICE_ID
+    assert device.get("Model") == "Tasmota"
+    assert device.get("Outputs") == 1
+    assert device.get("Meters") == 1
+    assert device.get("Inputs") == 0
+
+    device_by_id = smart_device.get_device(TASMOTA_DEVICE_ID)
+    assert device_by_id is not None, "Tasmota device should be found by ID"
+    assert device_by_id.get("Name") == TASMOTA_DEVICE_NAME
+
+
+def test_tasmota_device_online():
+    """Simulated Tasmota device should report online."""
+    device = smart_device.get_device(TASMOTA_DEVICE_NAME)
+    assert device.get("Online") is True, "Simulated Tasmota device should be online"
+    assert smart_device.is_device_online(TASMOTA_DEVICE_NAME), "is_device_online() should be True"
+
+
+def test_tasmota_get_device_status():
+    """get_device_status() should return True for a simulated Tasmota device."""
+    result = smart_device.get_device_status(TASMOTA_DEVICE_NAME)
+    assert result is True, "Simulated Tasmota device should return True from get_device_status()"
+
+
+def test_tasmota_get_output():
+    """get_device_component('output', ...) should find the Tasmota output by name and ID."""
+    output = smart_device.get_device_component("output", TASMOTA_OUTPUT_NAME)
+    assert output is not None, "Tasmota output should be found by name"
+    assert output.get("ID") == TASMOTA_OUTPUT_ID
+    assert isinstance(output.get("State"), bool), "Output State should be a bool"
+
+    output_by_id = smart_device.get_device_component("output", TASMOTA_OUTPUT_ID)
+    assert output_by_id.get("Name") == TASMOTA_OUTPUT_NAME
+
+
+def test_tasmota_get_meter():
+    """get_device_component('meter', ...) should find the Tasmota meter."""
+    meter = smart_device.get_device_component("meter", TASMOTA_METER_NAME)
+    assert meter is not None, "Tasmota meter should be found by name"
+    assert meter.get("ID") == TASMOTA_METER_ID
+
+    meter_by_id = smart_device.get_device_component("meter", TASMOTA_METER_ID)
+    assert meter_by_id.get("Name") == TASMOTA_METER_NAME
+
+
+def test_tasmota_no_inputs_block():
+    """Tasmota devices should not expose any input components."""
+    # No Inputs: block in config — provider's inputs list should have none for this device
+    view = smart_device.get_view()
+    snapshot = view.get_json_snapshot()
+    # All inputs in the snapshot come from Shelly only
+    for inp in snapshot["inputs"]:
+        assert inp.get("DeviceID") == DEVICE_ID, "All inputs should belong to the Shelly device"
+
+
+def test_tasmota_inputs_block_rejected():
+    """Initializing with an Inputs: block on a Tasmota device should raise RuntimeError."""
+    from sc_smart_device.providers.tasmota_provider import TasmotaProvider
+
+    bad_settings = {
+        "Devices": [
+            {
+                "Name": "Bad Tasmota",
+                "Model": "Tasmota",
+                "Simulate": True,
+                "Inputs": [{"Name": "Should Fail"}],
+            }
+        ]
+    }
+    provider = TasmotaProvider(logger)
+    with pytest.raises(RuntimeError, match="Inputs"):
+        provider.initialize_settings(bad_settings)
+
+
+def test_tasmota_change_output():
+    """change_output() should toggle a Tasmota simulated output."""
+    output = smart_device.get_device_component("output", TASMOTA_OUTPUT_NAME)
+    current_state = output.get("State")
+
+    result, did_change = smart_device.change_output(TASMOTA_OUTPUT_NAME, not current_state)
+    assert result is True, "change_output() should succeed for a simulated Tasmota device"
+    assert did_change is True, "Output state should have changed"
+
+    new_state = smart_device.get_device_component("output", TASMOTA_OUTPUT_NAME)["State"]
+    assert new_state != current_state, "Output state should be toggled"
+
+    # Restore original state
+    smart_device.change_output(TASMOTA_OUTPUT_NAME, current_state)
+
+
+def test_tasmota_print_device_status():
+    """print_device_status() should include the Tasmota device."""
+    status_str = smart_device.print_device_status(TASMOTA_DEVICE_NAME)
+    assert isinstance(status_str, str), "Status should be a string"
+    assert TASMOTA_DEVICE_NAME in status_str, "Status should mention the device name"
+    assert "Tasmota" in status_str, "Status should mention the provider model"
+
+
+def test_tasmota_view_output():
+    """SmartDeviceView should include the Tasmota output and allow state read."""
+    view = smart_device.get_view()
+    output_id = view.get_output_id(TASMOTA_OUTPUT_NAME)
+    assert output_id == TASMOTA_OUTPUT_ID, "Tasmota output ID should resolve correctly"
+    state = view.get_output_state(output_id)
+    assert isinstance(state, bool), "Tasmota output state should be a bool"
+
+
+def test_tasmota_view_meter():
+    """SmartDeviceView should include the Tasmota meter and allow energy/power reads."""
+    view = smart_device.get_view()
+    meter_id = view.get_meter_id(TASMOTA_METER_NAME)
+    assert meter_id == TASMOTA_METER_ID, "Tasmota meter ID should resolve correctly"
+    power = view.get_meter_power(meter_id)
+    assert isinstance(power, float), "Tasmota meter power should be a float"
+    energy = view.get_meter_energy(meter_id)
+    assert isinstance(energy, float), "Tasmota meter energy should be a float"
+
+
+def test_tasmota_view_get_device_value():
+    """get_device_value() should work for Tasmota devices through the view."""
+    view = smart_device.get_view()
+    assert view.get_device_value(TASMOTA_DEVICE_ID, "Name") == TASMOTA_DEVICE_NAME
+    assert view.get_device_value(TASMOTA_DEVICE_ID, "Online") is True
+    assert view.get_device_value(TASMOTA_DEVICE_ID, "NoSuchKey") is None
+    assert view.get_device_value(TASMOTA_DEVICE_ID, "NoSuchKey", "default") == "default"
+
+
+def test_tasmota_webhooks_not_supported():
+    """install_webhook() and does_device_have_webhooks() should reflect Tasmota limitations."""
+    device = smart_device.get_device(TASMOTA_DEVICE_NAME)
+    assert smart_device.does_device_have_webhooks(device) is False, (
+        "Tasmota devices should report no webhook support"
+    )
+    output = smart_device.get_device_component("output", TASMOTA_OUTPUT_NAME)
+    with pytest.raises(RuntimeError):
+        smart_device.install_webhook("output.toggle_on", output)

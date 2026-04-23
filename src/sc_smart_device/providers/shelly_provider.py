@@ -130,7 +130,13 @@ class ShellyProvider(BaseProvider):
         """
         if isinstance(device_identity, dict):
             if device_identity.get("ObjectType") == "device":
-                return device_identity
+                # Re-validate by ID so a dict from a different provider is rejected
+                device_id = device_identity.get("ID")
+                for device in self._devices:
+                    if device["ID"] == device_id:
+                        return device
+                error_msg = f"Device with ID {device_id!r} not found in ShellyProvider."
+                raise RuntimeError(error_msg)
             # Component dict — return parent device
             return self.get_device(device_identity["DeviceID"])
         for device in self._devices:
@@ -388,6 +394,8 @@ class ShellyProvider(BaseProvider):
         self._temp_probes.clear()
 
         for device_cfg in settings.get("Devices", []):
+            if str(device_cfg.get("Model")) == "Tasmota":
+                continue  # Tasmota devices are handled by TasmotaProvider
             self._add_device(device_cfg)
 
     def _add_device(self, device_config: dict) -> None:
@@ -527,12 +535,12 @@ class ShellyProvider(BaseProvider):
 
             if component_config is None:
                 new_comp["ID"] = len(storage) + 1
-                new_comp["Name"] = f"{prefix} {len(storage) + 1}"
+                new_comp["Name"] = f"{prefix} {new_comp['ID']}"
                 new_comp["Webhooks"] = False
             else:
                 cfg = component_config[comp_idx]
                 new_comp["ID"] = cfg.get("ID", len(storage) + 1)
-                new_comp["Name"] = cfg.get("Name", f"{prefix} {len(storage) + 1}")
+                new_comp["Name"] = cfg.get("Name", f"{prefix} {new_comp['ID']}")
                 new_comp["Webhooks"] = cfg.get("Webhooks", False)
 
             new_comp["ComponentIndex"] = comp_idx
@@ -604,14 +612,7 @@ class ShellyProvider(BaseProvider):
 # ── Internal — device status ─────────────────────────────────────────────────
 
     def _get_device_status(self, device_identity: dict | int | str) -> bool:  # noqa: PLR0912, PLR0914, PLR0915
-        if isinstance(device_identity, dict):
-            if device_identity.get("ObjectType") != "device":
-                self._raise_runtime_error(
-                    f"Expected device dict, got ObjectType={device_identity.get('ObjectType')!r}."
-                )
-            device = device_identity
-        else:
-            device = self.get_device(device_identity)
+        device = self.get_device(device_identity)
 
         if device["Simulate"]:
             self._import_device_information_from_json(device, create_if_no_file=True)
@@ -756,7 +757,7 @@ class ShellyProvider(BaseProvider):
 
     def _change_output(self, output_identity: dict | int | str, new_state: bool) -> tuple[bool, bool]:
         if isinstance(output_identity, dict):
-            device_output = output_identity
+            device_output = self.get_device_component("output", output_identity["ID"])
         else:
             device_output = self.get_device_component("output", output_identity)
 
@@ -804,10 +805,7 @@ class ShellyProvider(BaseProvider):
         return True, did_change
 
     def _get_device_location(self, device_identity: dict | int | str) -> dict | None:
-        if isinstance(device_identity, dict):
-            device = device_identity
-        else:
-            device = self.get_device(device_identity)
+        device = self.get_device(device_identity)
 
         if device["Simulate"]:
             return {"tz": "Australia/Sydney", "lat": -33.8688, "lon": 151.2093}
@@ -1129,6 +1127,29 @@ class ShellyProvider(BaseProvider):
         except json.JSONDecodeError as e:
             msg = f"JSON error loading {SHELLY_MODEL_FILE}: {e}"
             raise RuntimeError(msg) from e
+
+    @staticmethod
+    def get_model_component_counts(model_name: str) -> dict[str, int] | None:
+        """Return ``{"inputs": N, "outputs": N, "meters": N}`` for a Shelly model, or None.
+
+        Used by the global ID pre-processor in SCSmartDevice so that model-driven
+        components (omitted from the YAML config) can still receive globally unique IDs.
+        """
+        try:
+            pkg_files = resources.files("sc_smart_device")
+            model_file = pkg_files / SHELLY_MODEL_FILE
+            with model_file.open("r", encoding="utf-8") as f:
+                models = json.load(f)
+            model = next((m for m in models if m.get("model") == model_name), None)
+            if model:
+                return {
+                    "inputs": int(model.get("inputs", 0)),
+                    "outputs": int(model.get("outputs", 0)),
+                    "meters": int(model.get("meters", 0)),
+                }
+        except (FileNotFoundError, json.JSONDecodeError, StopIteration):
+            pass
+        return None
 
     def _log_debug(self, message: str) -> None:
         if self.allow_debug_logging:

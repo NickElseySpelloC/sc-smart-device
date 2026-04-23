@@ -9,13 +9,20 @@ from switch_init import switch_init
 
 from sc_smart_device import SCSmartDevice
 
+# ------- Uncomment the relevant section below to test different devices and meters -------
+# Test a Shelly switch
+# device_identity = "Sydney Dev A"
+# output_identity = "Sydney Dev A O1"
+# meter_identity = "Sydney Dev A M1"
+
+# Test a Tasmota switch
+device_identity = "Sydney Dev B"
+output_identity = "Sydney Dev B O1"
+meter_identity = "Sydney Dev B M1"
+
 
 def test_basic(logger: SCLogger, smart_switch_control: SCSmartDevice) -> None:
     """Test function for basic SmartSwitch control."""
-    device_identity = "Sydney Dev A"
-    output_identity = "Sydney Dev A O1"
-    meter_identity = "Sydney Dev A M1"
-
     logger.log_message(f"\n\n\nTesting basic functionality for device: {device_identity}", "summary")
 
     # Get the device
@@ -42,8 +49,8 @@ def test_basic(logger: SCLogger, smart_switch_control: SCSmartDevice) -> None:
         logger.log_message(f"#1 Output status for {output_identity}: Is Online: {is_online}, Current State: {current_state}", "detailed")
 
         # Change the output state to the opposite of the current state
-        logger.log_message("Waiting 7 seconds before changing the output state...", "detailed")
-        for i in range(7):
+        logger.log_message("Waiting 3 seconds before changing the output state...", "detailed")
+        for i in range(3):
             time.sleep(1)  # Short delay to ensure the device is ready for the next command
             print(f"{i + 1}...", end="", flush=True)
         logger.log_message("Attempting to change the output state...", "detailed")
@@ -67,7 +74,7 @@ def test_basic(logger: SCLogger, smart_switch_control: SCSmartDevice) -> None:
 
 def main():
     """Main function to run the example code."""
-    print(f"Hello from sc-utility running on {platform.system()}")
+    print(f"Hello from switch_basic running on {platform.system()}")
 
     # Initialize the configuration manager, logger, and Smart_switch control
     try:

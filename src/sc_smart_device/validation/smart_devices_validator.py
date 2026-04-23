@@ -89,6 +89,14 @@ smart_devices_validator: dict = {
                         "Port": {"type": "number", "required": False, "nullable": True},
                         "Simulate": {"type": "boolean", "required": False, "nullable": True},
                         "ExpectOffline": {"type": "boolean", "required": False, "nullable": True},
+                        "Tasmota": {
+                            "type": "dict",
+                            "required": False,
+                            "nullable": True,
+                            "schema": {
+                                "DeviceType": {"type": "string", "required": False, "nullable": True},
+                            },
+                        },
                         "Inputs": {
                             "type": "list",
                             "required": False,

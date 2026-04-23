@@ -8,17 +8,25 @@ from switch_init import switch_init
 
 from sc_smart_device import SCSmartDevice
 
+# ------- Uncomment the relevant section below to test different devices and meters -------
+# Test a Shelly energy Meter
+meter_device_name = "Sydney Panel EM1"
+output_name = "Sydney Panel EM1 O1"
+meter1_name = "Sydney Panel EM1 M1"
+meter2_name = "Sydney Panel EM1 M2"
 
-def test_new_meter(logger: SCLogger, smart_switch_control: SCSmartDevice):  # noqa: PLR0914
+# Test a Tasmota switch
+# meter_device_name = "Sydney Dev B"
+# output_name = "Sydney Dev B O1"
+# meter1_name = "Sydney Dev B M1"
+# meter2_name = None
+
+
+def test_new_meter(logger: SCLogger, smart_switch_control: SCSmartDevice):
     """Test SmartDevices energy meter functionality."""
     loop_delay = 1
     loop_count = 0
     max_loops = 5
-
-    meter_device_name = "Sydney Panel EM1"
-    meter1_name = "Sydney Panel EM1 M1"
-    meter2_name = "Sydney Panel EM1 M2"
-    output_name = "Sydney Panel EM1 O1"
 
     logger.log_message(f"Testing meter functionality for device: {meter_device_name}", "summary")
 
@@ -27,7 +35,7 @@ def test_new_meter(logger: SCLogger, smart_switch_control: SCSmartDevice):  # no
         meter_device = smart_switch_control.get_device(meter_device_name)
         output = smart_switch_control.get_device_component("output", output_name)
         meter1 = smart_switch_control.get_device_component("meter", meter1_name)
-        meter2 = smart_switch_control.get_device_component("meter", meter2_name)
+        meter2 = smart_switch_control.get_device_component("meter", meter2_name) if meter2_name else None
     except RuntimeError as e:
         print(f"Error getting device: {e}", file=sys.stderr)
         sys.exit(1)
@@ -44,13 +52,14 @@ def test_new_meter(logger: SCLogger, smart_switch_control: SCSmartDevice):  # no
             meter1_volts = meter1.get("Voltage", False)
             meter1_power = meter1.get("Power", False)
             meter1_energy = meter1.get("Energy", False)
-            meter2_volts = meter2.get("Voltage", False)
-            meter2_power = meter2.get("Power", False)
-            meter2_energy = meter2.get("Energy", False)
+            meter2_volts = meter2.get("Voltage", False) if meter2 else False
+            meter2_power = meter2.get("Power", False) if meter2 else False
+            meter2_energy = meter2.get("Energy", False) if meter2 else False
 
             logger.log_message(f"{output_name} State: {output.get('State', False)}.", "detailed")
             logger.log_message(f"{meter1_name} Volts: {meter1_volts}, Power: {meter1_power}, Energy: {meter1_energy}.", "detailed")
-            logger.log_message(f"{meter2_name} Volts: {meter2_volts}, Power: {meter2_power}, Energy: {meter2_energy}.", "detailed")
+            if meter2:
+                logger.log_message(f"{meter2_name} Volts: {meter2_volts}, Power: {meter2_power}, Energy: {meter2_energy}.", "detailed")
 
             time.sleep(loop_delay)
             loop_count += 1
@@ -58,7 +67,7 @@ def test_new_meter(logger: SCLogger, smart_switch_control: SCSmartDevice):  # no
 
 def main():
     """Main function to run the example code."""
-    print(f"Hello from sc-utility running on {platform.system()}")
+    print(f"Hello from switch_meter running on {platform.system()}")
 
     # Initialize the configuration manager, logger, and SmartDevices control
     try:

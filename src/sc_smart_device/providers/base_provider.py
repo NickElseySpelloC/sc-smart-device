@@ -49,3 +49,53 @@ class BaseProvider(ABC):
     @abstractmethod
     def get_normalized_status(self) -> SmartDeviceStatus:
         """Return a normalized snapshot with provider-agnostic public dicts."""
+
+    @abstractmethod
+    def get_device(self, device_identity: dict | int | str) -> dict:
+        """Return the internal mutable device dict. Raise RuntimeError if not found."""
+
+    @abstractmethod
+    def get_device_component(
+        self,
+        component_type: str,
+        component_identity: int | str,
+        use_index: bool | None = None,
+    ) -> dict:
+        """Return an internal mutable component dict. Raise RuntimeError if not found."""
+
+    @abstractmethod
+    def is_device_online(self, device_identity: dict | int | str | None = None) -> bool:
+        """Ping device(s) and return True if all are online."""
+
+    @abstractmethod
+    def get_device_information(self, device_identity: dict | int | str, refresh_status: bool = False) -> dict:
+        """Return a device dict augmented with its component sub-lists."""
+
+    @abstractmethod
+    def print_device_status(self, device_identity: int | str | None = None) -> str:
+        """Return a human-readable status string for one or all devices."""
+
+    # ── Optional / provider-specific — default no-op implementations ─────────
+
+    def does_device_have_webhooks(self, device: dict) -> bool:
+        """Return True if any component of the device has webhooks enabled."""
+        return False
+
+    def install_webhook(
+        self,
+        event: str,
+        component: dict,
+        url: str | None = None,
+        additional_payload: dict | None = None,
+    ) -> None:
+        """Install a webhook. Raises RuntimeError if not supported by this provider."""
+        msg = f"{type(self).__name__} does not support webhooks."
+        raise RuntimeError(msg)
+
+    def pull_webhook_event(self) -> dict | None:
+        """Return the oldest queued webhook event, or None."""
+        return None
+
+    def print_model_library(self, mode_str: str = "brief", model_id: str | None = None) -> str:
+        """Return a human-readable summary of supported hardware models."""
+        return ""

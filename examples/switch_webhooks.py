@@ -10,14 +10,17 @@ from switch_init import switch_init
 
 from sc_smart_device import SCSmartDevice
 
+# Test a Shelly switch
+device_identity = "Sydney Dev A"
+
+# Note: Webhooks are not supported on Tasmota devices, so no Tasmota test section for this example.
+
 
 def test_webhooks(logger: SCLogger, smart_switch_control: SCSmartDevice, wake_event: threading.Event):
     """Test function for webhooks SmartDevices control."""
     loop_delay = 2
     loop_count = 0
-    max_loops = 10
-
-    device_identity = "Sydney Dev A"
+    max_loops = 20
 
     logger.log_message(f"\n\n\nTesting webhook functionality for device: {device_identity}", "summary")
 
@@ -63,7 +66,7 @@ def main():
     """Main function to run the example code."""
     wake_event = threading.Event()
 
-    print(f"Hello from sc-utility running on {platform.system()}")
+    print(f"Hello from switch_webhooks running on {platform.system()}")
 
     # Initialize the configuration manager, logger, and SmartDevices control
     try:

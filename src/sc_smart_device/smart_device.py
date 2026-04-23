@@ -4,10 +4,14 @@ Client apps should only depend on this class, not on any provider directly.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import copy
+from typing import TYPE_CHECKING, Iterator
 
+from sc_smart_device.models.smart_device_status import SmartDeviceStatus
 from sc_smart_device.models.smart_device_view import SmartDeviceView
+from sc_smart_device.providers.base_provider import BaseProvider
 from sc_smart_device.providers.shelly_provider import ShellyProvider
+from sc_smart_device.providers.tasmota_provider import TasmotaProvider
 
 if TYPE_CHECKING:
     import threading
@@ -16,7 +20,12 @@ if TYPE_CHECKING:
 
 
 class SCSmartDevice:  # noqa: PLR0904
-    """Unified smart-device controller."""
+    """Unified smart-device controller.
+
+    Aggregates one or more hardware providers (currently :class:`ShellyProvider`
+    and :class:`TasmotaProvider`) behind a single, stable public API.  Client
+    apps should never depend on a provider class directly.
+    """
 
     def __init__(
         self,
@@ -38,9 +47,208 @@ class SCSmartDevice:  # noqa: PLR0904
             RuntimeError: If config is invalid or the model file cannot be loaded.
         """  # noqa: DOC502
         self._logger = logger
-        self._provider = ShellyProvider(logger, app_wake_event)
-        self._provider.initialize_settings(device_settings)
-        self._provider.start_services()
+        self._providers: list[BaseProvider] = [
+            ShellyProvider(logger, app_wake_event),
+            TasmotaProvider(logger),
+        ]
+        preprocessed = self._preprocess_config(device_settings)
+        for provider in self._providers:
+            provider.initialize_settings(preprocessed)
+        self._validate_global_uniqueness()
+        # Only Shelly has a webhook server; Tasmota start_services is a no-op
+        for provider in self._providers:
+            provider.start_services()
+
+    # ── Global config validation ─────────────────────────────────────────────
+
+    def _validate_global_uniqueness(self) -> None:
+        """Verify that device IDs and names are unique across ALL providers.
+
+        Because each provider assigns IDs independently, a misconfigured YAML
+        could produce duplicate IDs across providers, causing silent mis-routing.
+        This check runs once after all providers are initialised and raises a
+        descriptive RuntimeError so the problem is caught at startup.
+
+        Raises:
+            RuntimeError: If any device ID or name is shared across providers,
+                or if any component ID is duplicated within its type across providers.
+        """
+        status = self._aggregated_status()
+
+        # Check devices
+        seen_device_ids: dict[int, str] = {}
+        seen_device_names: dict[str, int] = {}
+        for device in status.devices:
+            did, dname = device["ID"], device["Name"]
+            if did in seen_device_ids:
+                msg = (
+                    f"Duplicate device ID {did!r}: shared by "
+                    f"{seen_device_ids[did]!r} and {dname!r}."
+                )
+                raise RuntimeError(msg)
+            if dname in seen_device_names:
+                msg = f"Duplicate device Name {dname!r}: device names must be globally unique."
+                raise RuntimeError(msg)
+            seen_device_ids[did] = dname
+            seen_device_names[dname] = did
+
+        # Check components by type
+        for label, components in (
+            ("output", status.outputs),
+            ("input", status.inputs),
+            ("meter", status.meters),
+            ("temp_probe", status.temp_probes),
+        ):
+            seen_ids: dict[int, str] = {}
+            seen_names: dict[str, int] = {}
+            for comp in components:
+                cid, cname = comp["ID"], comp["Name"]
+                if cid in seen_ids:
+                    msg = (
+                        f"Duplicate {label} ID {cid!r}: shared by "
+                        f"{seen_ids[cid]!r} and {cname!r}."
+                    )
+                    raise RuntimeError(msg)
+                if cname in seen_names:
+                    msg = f"Duplicate {label} Name {cname!r}: component names must be globally unique."
+                    raise RuntimeError(msg)
+                seen_ids[cid] = cname
+                seen_names[cname] = cid
+
+    # ── Global config pre-processing ─────────────────────────────────────────
+
+    @staticmethod
+    def _preprocess_config(device_settings: dict) -> dict:
+        """Assign globally unique IDs to every device and component before providers see the config.
+
+        Client apps only need to supply ``Name`` (or ``ID``, or both).  This
+        method fills in any missing ``ID`` values with sequentially-assigned
+        integers that are guaranteed to be unique across ALL providers and ALL
+        component types.
+
+        For Shelly devices that don't list component blocks (e.g. no ``Inputs:``
+        section), the method looks up the model file to find out how many
+        components the hardware has and synthesises placeholder dicts so those
+        components also receive globally unique IDs.
+
+        The original ``device_settings`` dict is never mutated — a deep copy is
+        returned.
+        """
+        settings = copy.deepcopy(device_settings)
+        devices: list[dict] = settings.get("Devices") or []
+
+        _comp_types = ("Inputs", "Outputs", "Meters", "TempProbes")
+        _model_key_map = {"Inputs": "inputs", "Outputs": "outputs", "Meters": "meters"}
+
+        # ── Phase 1: expand Shelly model-driven component lists ───────────────
+        # If a Shelly device omits a component block the provider creates those
+        # components automatically from the model file.  We synthesise empty dicts
+        # here so Phase 2 can assign them globally unique IDs.
+        for device in devices:
+            if str(device.get("Model")) == "Tasmota":
+                continue  # Tasmota components are always explicit in config
+            counts = ShellyProvider.get_model_component_counts(str(device.get("Model", "")))
+            if not counts:
+                continue
+            for ct, model_key in _model_key_map.items():
+                n = counts.get(model_key, 0)
+                if n > 0 and device.get(ct) is None:
+                    # Synthesise n placeholder dicts — providers will fill in names
+                    device[ct] = [{} for _ in range(n)]
+
+        # ── Phase 2: collect all explicitly-set IDs ───────────────────────────
+        used_device_ids: set[int] = set()
+        used_comp_ids: dict[str, set[int]] = {ct: set() for ct in _comp_types}
+
+        for device in devices:
+            if device.get("ID") is not None:
+                used_device_ids.add(int(device["ID"]))
+            for ct in _comp_types:
+                for comp in device.get(ct) or []:
+                    if comp.get("ID") is not None:
+                        used_comp_ids[ct].add(int(comp["ID"]))
+
+        # ── Phase 3: sequential generators that skip already-used IDs ─────────
+        def _make_gen(used: set[int]) -> Iterator[int]:
+            i = 1
+            while True:
+                if i not in used:
+                    used.add(i)
+                    yield i
+                i += 1
+
+        device_gen = _make_gen(used_device_ids)
+        comp_gens = {ct: _make_gen(used_comp_ids[ct]) for ct in _comp_types}
+
+        # ── Phase 4: assign missing IDs ───────────────────────────────────────
+        for device in devices:
+            if device.get("ID") is None:
+                device["ID"] = next(device_gen)
+            for ct in _comp_types:
+                for comp in device.get(ct) or []:
+                    if comp.get("ID") is None:
+                        comp["ID"] = next(comp_gens[ct])
+
+        return settings
+
+    # ── Provider routing helpers ─────────────────────────────────────────────
+
+    def _aggregated_status(self) -> SmartDeviceStatus:
+        """Merge normalized status from all providers into one SmartDeviceStatus."""
+        devices: list[dict] = []
+        inputs: list[dict] = []
+        outputs: list[dict] = []
+        meters: list[dict] = []
+        temp_probes: list[dict] = []
+        for provider in self._providers:
+            s = provider.get_normalized_status()
+            devices.extend(s.devices)
+            inputs.extend(s.inputs)
+            outputs.extend(s.outputs)
+            meters.extend(s.meters)
+            temp_probes.extend(s.temp_probes)
+        return SmartDeviceStatus(
+            devices=devices,
+            inputs=inputs,
+            outputs=outputs,
+            meters=meters,
+            temp_probes=temp_probes,
+        )
+
+    def _provider_for_device(self, device_identity: dict | int | str) -> BaseProvider:
+        """Return the provider that owns the given device.
+
+        Raises:
+            RuntimeError: If the device is not found in any provider.
+        """
+        for provider in self._providers:
+            try:
+                provider.get_device(device_identity)
+                return provider
+            except RuntimeError:
+                continue
+        msg = f"Device {device_identity!r} not found in any provider."
+        raise RuntimeError(msg)
+
+    def _provider_for_component(
+        self,
+        component_type: str,
+        component_identity: int | str,
+        use_index: bool | None = None,
+    ) -> BaseProvider:
+        """Return the provider that owns the given component.
+
+        Raises:
+            RuntimeError: If the component is not found in any provider.
+        """
+        for provider in self._providers:
+            try:
+                provider.get_device_component(component_type, component_identity, use_index)
+                return provider
+            except RuntimeError:
+                continue
+        msg = f"{component_type} {component_identity!r} not found in any provider."
+        raise RuntimeError(msg)
 
     # ── Re-initialise ────────────────────────────────────────────────────────
 
@@ -53,34 +261,37 @@ class SCSmartDevice:  # noqa: PLR0904
             device_settings: Updated ``SCSmartDevices`` dict.
             refresh_status: If True (default) refresh device state after loading.
         """
-        self._provider.initialize_settings(device_settings, refresh_status)
+        preprocessed = self._preprocess_config(device_settings)
+        for provider in self._providers:
+            provider.initialize_settings(preprocessed, refresh_status)
+        self._validate_global_uniqueness()
 
     # ── Public list properties (normalized, provider-agnostic copies) ─────────
 
     @property
     def devices(self) -> list[dict]:
         """Normalized snapshot of all device dicts."""
-        return self._provider.get_normalized_status().devices
+        return self._aggregated_status().devices
 
     @property
     def inputs(self) -> list[dict]:
         """Normalized snapshot of all input component dicts."""
-        return self._provider.get_normalized_status().inputs
+        return self._aggregated_status().inputs
 
     @property
     def outputs(self) -> list[dict]:
         """Normalized snapshot of all output component dicts."""
-        return self._provider.get_normalized_status().outputs
+        return self._aggregated_status().outputs
 
     @property
     def meters(self) -> list[dict]:
         """Normalized snapshot of all meter component dicts."""
-        return self._provider.get_normalized_status().meters
+        return self._aggregated_status().meters
 
     @property
     def temp_probes(self) -> list[dict]:
         """Normalized snapshot of all temperature probe dicts."""
-        return self._provider.get_normalized_status().temp_probes
+        return self._aggregated_status().temp_probes
 
     # ── Thread-safe view ────────────────────────────────────────────────────
 
@@ -93,7 +304,7 @@ class SCSmartDevice:  # noqa: PLR0904
         Returns:
             SmartDeviceView built from the current normalized status.
         """
-        return SmartDeviceView(self._provider.get_normalized_status())
+        return SmartDeviceView(self._aggregated_status())
 
     # ── Live internal lookups (mutable dicts, all fields) ────────────────────
     # These return references into the provider's internal state so that the
@@ -119,7 +330,7 @@ class SCSmartDevice:  # noqa: PLR0904
         Raises:
             RuntimeError: If the device is not found in the list of devices.
         """  # noqa: DOC502
-        return self._provider.get_device(device_identity)
+        return self._provider_for_device(device_identity).get_device(device_identity)
 
     def get_device_component(
         self,
@@ -140,7 +351,9 @@ class SCSmartDevice:  # noqa: PLR0904
         Raises:
             RuntimeError: If the component is not found in the list.
         """  # noqa: DOC502
-        return self._provider.get_device_component(component_type, component_identity, use_index)
+        return self._provider_for_component(
+            component_type, component_identity, use_index
+        ).get_device_component(component_type, component_identity, use_index)
 
     # ── Convenience component shorthand ─────────────────────────────────────
 
@@ -150,7 +363,7 @@ class SCSmartDevice:  # noqa: PLR0904
         Returns:
             The internal output component dict.
         """
-        return self._provider.get_device_component("output", output_identity)
+        return self.get_device_component("output", output_identity)
 
     def get_input(self, input_identity: int | str) -> dict:
         """Shorthand for ``get_device_component("input", input_identity)``.
@@ -158,7 +371,7 @@ class SCSmartDevice:  # noqa: PLR0904
         Returns:
             The internal input component dict.
         """
-        return self._provider.get_device_component("input", input_identity)
+        return self.get_device_component("input", input_identity)
 
     def get_meter(self, meter_identity: int | str) -> dict:
         """Shorthand for ``get_device_component("meter", meter_identity)``.
@@ -166,7 +379,7 @@ class SCSmartDevice:  # noqa: PLR0904
         Returns:
             The internal meter component dict.
         """
-        return self._provider.get_device_component("meter", meter_identity)
+        return self.get_device_component("meter", meter_identity)
 
     def get_temp_probe(self, probe_identity: int | str) -> dict:
         """Shorthand for ``get_device_component("temp_probe", probe_identity)``.
@@ -174,7 +387,7 @@ class SCSmartDevice:  # noqa: PLR0904
         Returns:
             The internal temperature probe component dict.
         """
-        return self._provider.get_device_component("temp_probe", probe_identity)
+        return self.get_device_component("temp_probe", probe_identity)
 
     # ── Device status ────────────────────────────────────────────────────────
 
@@ -185,7 +398,7 @@ class SCSmartDevice:  # noqa: PLR0904
 
         Args:
             device_identity (Optional (dict | int | str | None), optional): The actual device object, device component object,
-                        device ID or device name of the device to check. If None, checks all device.
+                        device ID or device name of the device to check. If None, checks all devices.
 
         Returns:
             result (bool): True if the device is online, False otherwise. If all devices are checked, returns True if all device are online.
@@ -193,10 +406,13 @@ class SCSmartDevice:  # noqa: PLR0904
         Raises:
             RuntimeError: If the device is not found in the list of devices.
         """  # noqa: DOC502
-        return self._provider.is_device_online(device_identity)
+        if device_identity is not None:
+            return self._provider_for_device(device_identity).is_device_online(device_identity)
+        # Check all providers
+        return all(provider.is_device_online() for provider in self._providers)
 
     def get_device_status(self, device_identity: dict | int | str) -> bool:
-        """Gets the status of a Shelly device.
+        """Gets the status of a device.
 
         Args:
             device_identity (dict | int | str): A device dict, or the ID or name of the device to check.
@@ -208,22 +424,20 @@ class SCSmartDevice:  # noqa: PLR0904
             RuntimeError: If the device is not found in the list of devices or if there is an error getting the status.
             TimeoutError: If the device is online (ping) but the request times out while getting the device status.
         """  # noqa: DOC502
-        return self._provider.get_device_status(device_identity)
+        return self._provider_for_device(device_identity).get_device_status(device_identity)
 
     def refresh_all_device_statuses(self) -> None:
-        """Refreshes the status of all Shelly devices.
-
-        This function iterates through all devices and updates their status by calling get_device_status.
-        It also calculates the total power and energy consumption for each device.
+        """Refreshes the status of all devices across all providers.
 
         Raises:
             RuntimeError: If there is an error getting the status of any device.
         """  # noqa: DOC502
-        self._provider.refresh_all_device_statuses()
+        for provider in self._providers:
+            provider.refresh_all_device_statuses()
 
     def refresh(self) -> None:
         """Alias for :meth:`refresh_all_device_statuses`."""
-        self._provider.refresh_all_device_statuses()
+        self.refresh_all_device_statuses()
 
     # ── Output control ───────────────────────────────────────────────────────
 
@@ -246,7 +460,11 @@ class SCSmartDevice:  # noqa: PLR0904
             TimeoutError: If the device is online (ping) but the state change request times out.
 
         """  # noqa: DOC502
-        return self._provider.set_output(output_identity, new_state)
+        if isinstance(output_identity, dict):
+            provider = self._provider_for_device(output_identity.get("DeviceID", -1))
+        else:
+            provider = self._provider_for_component("output", output_identity)
+        return provider.set_output(output_identity, new_state)
 
     # ── Webhooks ─────────────────────────────────────────────────────────────
 
@@ -267,28 +485,34 @@ class SCSmartDevice:  # noqa: PLR0904
             url: Override the callback URL. Auto-constructed if None.
             additional_payload: Extra query-string parameters to include.
         """
-        self._provider.install_webhook(event, component, url, additional_payload)
+        self._provider_for_device(component.get("DeviceID", -1)).install_webhook(
+            event, component, url, additional_payload
+        )
 
     def pull_webhook_event(self) -> dict | None:
         """Return the oldest queued webhook event and remove it from the queue.
-
-        Use this if your app has been interrupted by a webhook event (your app_wake_event was set).
-        This will return the earliest webhook event that was received and remove it from the queue.
 
         Returns:
             Event dict with keys ``timestamp``, ``Event``, ``Device``,
             ``Component``, etc.; or None if the queue is empty.
         """
-        return self._provider.pull_webhook_event()
+        for provider in self._providers:
+            event = provider.pull_webhook_event()
+            if event is not None:
+                return event
+        return None
 
     def does_device_have_webhooks(self, device: dict) -> bool:
         """Return True if any component of the device has webhooks enabled."""
-        return self._provider.does_device_have_webhooks(device)
+        try:
+            return self._provider_for_device(device.get("ID", -1)).does_device_have_webhooks(device)
+        except RuntimeError:
+            return False
 
     # ── Device location ──────────────────────────────────────────────────────
 
     def get_device_location(self, device_identity: dict | int | str) -> dict | None:
-        """Gets the timezone and location of a Shelly device if available.
+        """Gets the timezone and location of a device if available.
 
         Returns a dict in the following format:
            "tz": "Europe/Sofia",
@@ -305,7 +529,7 @@ class SCSmartDevice:  # noqa: PLR0904
             RuntimeError: If the device is not found in the list of devices or if there is an error getting the status.
             TimeoutError: If the device is online (ping) but the request times out while getting the device status.
         """  # noqa: DOC502
-        return self._provider.get_device_location(device_identity)
+        return self._provider_for_device(device_identity).get_device_location(device_identity)
 
     # ── Device information ───────────────────────────────────────────────────
 
@@ -325,7 +549,9 @@ class SCSmartDevice:  # noqa: PLR0904
         Raises:
             RuntimeError: If the device is not found in the list of devices or if there is an error getting the status.
         """  # noqa: DOC502
-        return self._provider.get_device_information(device_identity, refresh_status)
+        return self._provider_for_device(device_identity).get_device_information(
+            device_identity, refresh_status
+        )
 
     # ── Diagnostics ──────────────────────────────────────────────────────────
 
@@ -341,25 +567,31 @@ class SCSmartDevice:  # noqa: PLR0904
         Raises:
             RuntimeError: If the device is not found in the list of devices.
         """  # noqa: DOC502
-        return self._provider.print_device_status(device_identity)
+        if device_identity is not None:
+            return self._provider_for_device(device_identity).print_device_status(device_identity)
+        # Aggregate from all providers
+        parts = [p.print_device_status() for p in self._providers if p.get_normalized_status().devices]
+        return "\n".join(part for part in parts if part)
 
     def print_model_library(self, mode_str: str = "brief", model_id: str | None = None) -> str:
-        """Prints the Shelly model library.
+        """Prints the model library for all providers that have one.
 
         Args:
             mode_str (str, optional): The mode of printing. Can be "brief" or "detailed". Defaults to "brief".
             model_id (Optional (str), optional): If provided, filters the models by this model name. If None, prints all models.
 
         Returns:
-            library_info (str): A string representation of the Shelly model library.
+            library_info (str): A string representation of the model library.
         """
-        return self._provider.print_model_library(mode_str, model_id)
+        parts = [p.print_model_library(mode_str, model_id) for p in self._providers]
+        return "\n".join(part for part in parts if part)
 
     # ── Lifecycle ────────────────────────────────────────────────────────────
 
     def shutdown(self) -> None:
-        """Stop the webhook server and release all resources.
+        """Stop all provider services and release resources.
 
         Call this when the client application is terminating.
         """
-        self._provider.stop_services()
+        for provider in self._providers:
+            provider.stop_services()
