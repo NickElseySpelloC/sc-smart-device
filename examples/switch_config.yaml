@@ -37,14 +37,16 @@ SCSmartDevices:
       Outputs:
         - Name: "Sydney Dev A O1"
           Webhooks: True
+          Group: "Living Room"
         - Name: "Sydney Dev A O2"
+          Group: "Living Room"
       Meters:
         - Name: "Sydney Dev A M1"
         - Name: "Sydney Dev A M2"
     - Name: Sydney Solar
       Model: Shelly2PMG3
       Hostname: 192.168.86.35
-      Simulate: True
+      Simulate: False
       ExpectOffline: True
       Outputs:
         - Name: "Solar Pump Output"

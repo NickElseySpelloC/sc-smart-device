@@ -11,6 +11,7 @@ smart_switch_extra_validation = {
                             "schema": {
                                 "schema": {
                                     "Colour": {"type": "string", "required": False, "nullable": True},
+                                    "Group": {"type": "string", "required": False, "nullable": True},
                                     "Size": {"type": "string", "required": False, "nullable": True},
                                 },
                             },

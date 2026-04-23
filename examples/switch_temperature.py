@@ -1,21 +1,11 @@
 """Example of using the SmartDevice control to read temperature sensors."""
-# ruff: noqa: E402
-
 import platform
 import sys
 import time
-from pathlib import Path
-
-# Allow running this script directly from a src/ layout checkout.
-_project_root = Path(__file__).resolve().parents[1]
-if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
-if str(_project_root / "src") not in sys.path:
-    sys.path.insert(0, str(_project_root / "src"))
 
 from sc_foundation import SCLogger
+from switch_init import switch_init
 
-from examples.switch_init import switch_init
 from sc_smart_device import SCSmartDevice
 
 

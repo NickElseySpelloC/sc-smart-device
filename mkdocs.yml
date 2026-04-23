@@ -5,6 +5,9 @@ theme:
   name: material
   features:
     - navigation.expand
+
+extra_css:
+  - stylesheets/extra.css
     
 plugins:
   - search
@@ -21,9 +24,12 @@ plugins:
 
 nav:
   - Home: index.md
-  - Configuration: example_config.md
+  - Example Config: example_config.md
+  - Example Code: example_code.md
   - Object Reference: objects.md
   - Shelly Models Library: shelly_models_list.md
+  - Shelly Temperature Probes: shelly_temp_probes.md
+  - Shelly Webhooks: shelly_webhooks.md
   - API Reference:
       - SCSmartDevice: sc_smart_device.md
       - SmartDeviceView: sc_smart_device_view.md

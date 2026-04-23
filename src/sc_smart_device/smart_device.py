@@ -102,13 +102,23 @@ class SCSmartDevice:  # noqa: PLR0904
     # accessible here but not exposed through the normalized properties above.
 
     def get_device(self, device_identity: dict | int | str) -> dict:
-        """Return the internal device dict for the given ID, name, or dict.
+        """Returns the device index for a given device ID or name.
+
+        For device_identity you can pass:
+        - A device object (dict) to retrieve it directly.
+        - The device ID (int) to look it up by ID.
+        - The device name (str) to look it up by name.
+        - A component object (dict), which will return the parent device.
 
         Args:
-            device_identity: Device dict, integer ID, or name string.
-                             A component dict is also accepted and returns the
-                             parent device.
-        """
+            device_identity (dict | int | str): The identifier for the device.
+
+        Returns:
+            device (dict): The device object if found.
+
+        Raises:
+            RuntimeError: If the device is not found in the list of devices.
+        """  # noqa: DOC502
         return self._provider.get_device(device_identity)
 
     def get_device_component(
@@ -117,14 +127,19 @@ class SCSmartDevice:  # noqa: PLR0904
         component_identity: int | str,
         use_index: bool | None = None,
     ) -> dict:
-        """Return the internal component dict for the given type and identity.
+        """Returns a device component's index for a given component ID or name.
 
         Args:
-            component_type: One of ``"input"``, ``"output"``, ``"meter"``,
-                            or ``"temp_probe"``.
-            component_identity: Component ID (int) or name (str).
-            use_index: If True, match by ``ComponentIndex`` instead of ID/name.
-        """
+            component_type (str): The type of component to retrieve ('input', 'output', 'meter' or 'temp_probe').
+            component_identity (int | str): The ID or name of the component to retrieve.
+            use_index (bool | None): If True, lookup by index instead of ID or name.
+
+        Returns:
+            component(dict): The component index if found.
+
+        Raises:
+            RuntimeError: If the component is not found in the list.
+        """  # noqa: DOC502
         return self._provider.get_device_component(component_type, component_identity, use_index)
 
     # ── Convenience component shorthand ─────────────────────────────────────
@@ -164,29 +179,46 @@ class SCSmartDevice:  # noqa: PLR0904
     # ── Device status ────────────────────────────────────────────────────────
 
     def is_device_online(self, device_identity: dict | int | str | None = None) -> bool:
-        """Ping one device (or all devices) and return online status.
+        """See if a device is alive by pinging it.
+
+        Returns the result and updates the device's online status. If we are in simulation mode, always returns True.
 
         Args:
-            device_identity: Device to check, or None to check all.
+            device_identity (Optional (dict | int | str | None), optional): The actual device object, device component object,
+                        device ID or device name of the device to check. If None, checks all device.
 
         Returns:
-            True if the selected device (or all devices) is online.
-        """
+            result (bool): True if the device is online, False otherwise. If all devices are checked, returns True if all device are online.
+
+        Raises:
+            RuntimeError: If the device is not found in the list of devices.
+        """  # noqa: DOC502
         return self._provider.is_device_online(device_identity)
 
     def get_device_status(self, device_identity: dict | int | str) -> bool:
-        """Refresh the status of one device from the hardware.
+        """Gets the status of a Shelly device.
 
         Args:
-            device_identity: Device dict, ID, or name.
+            device_identity (dict | int | str): A device dict, or the ID or name of the device to check.
 
         Returns:
-            True if the device is online and status was retrieved.
-        """
+            result (bool): True if the device is online, False otherwise.
+
+        Raises:
+            RuntimeError: If the device is not found in the list of devices or if there is an error getting the status.
+            TimeoutError: If the device is online (ping) but the request times out while getting the device status.
+        """  # noqa: DOC502
         return self._provider.get_device_status(device_identity)
 
     def refresh_all_device_statuses(self) -> None:
-        """Refresh status for every configured device."""
+        """Refreshes the status of all Shelly devices.
+
+        This function iterates through all devices and updates their status by calling get_device_status.
+        It also calculates the total power and energy consumption for each device.
+
+        Raises:
+            RuntimeError: If there is an error getting the status of any device.
+        """  # noqa: DOC502
         self._provider.refresh_all_device_statuses()
 
     def refresh(self) -> None:
@@ -208,7 +240,12 @@ class SCSmartDevice:  # noqa: PLR0904
             ``(success, did_change)`` — success is False when the device is
             offline; did_change is False when the output was already in the
             requested state.
-        """
+
+        Raises:
+            RuntimeError: There was an error changing the device output state.
+            TimeoutError: If the device is online (ping) but the state change request times out.
+
+        """  # noqa: DOC502
         return self._provider.set_output(output_identity, new_state)
 
     # ── Webhooks ─────────────────────────────────────────────────────────────
@@ -222,6 +259,8 @@ class SCSmartDevice:  # noqa: PLR0904
     ) -> None:
         """Install a webhook on a device component.
 
+        See https://nickelseyspelloc.github.io/sc-smart-device/shelly_webhooks/ for details on supported events and payloads.
+
         Args:
             event: Shelly event name, e.g. ``"input.toggle_on"``.
             component: Component dict (from :meth:`get_device_component`).
@@ -232,6 +271,9 @@ class SCSmartDevice:  # noqa: PLR0904
 
     def pull_webhook_event(self) -> dict | None:
         """Return the oldest queued webhook event and remove it from the queue.
+
+        Use this if your app has been interrupted by a webhook event (your app_wake_event was set).
+        This will return the earliest webhook event that was received and remove it from the queue.
 
         Returns:
             Event dict with keys ``timestamp``, ``Event``, ``Device``,
@@ -246,11 +288,23 @@ class SCSmartDevice:  # noqa: PLR0904
     # ── Device location ──────────────────────────────────────────────────────
 
     def get_device_location(self, device_identity: dict | int | str) -> dict | None:
-        """Return timezone/lat/lon for a Shelly device, or None.
+        """Gets the timezone and location of a Shelly device if available.
+
+        Returns a dict in the following format:
+           "tz": "Europe/Sofia",
+           "lat": 42.67236,
+           "lon": 23.38738
 
         Args:
-            device_identity: Device dict, ID, or name.
-        """
+            device_identity (dict | int | str): A device dict, or the ID or name of the device to check.
+
+        Returns:
+            location (dict | None): A dictionary containing the timezone and location of the device, or None if not available.
+
+        Raises:
+            RuntimeError: If the device is not found in the list of devices or if there is an error getting the status.
+            TimeoutError: If the device is online (ping) but the request times out while getting the device status.
+        """  # noqa: DOC502
         return self._provider.get_device_location(device_identity)
 
     # ── Device information ───────────────────────────────────────────────────
@@ -267,21 +321,37 @@ class SCSmartDevice:  # noqa: PLR0904
         Returns:
             Device dict augmented with ``Inputs``, ``Outputs``, ``Meters``,
             and ``TempProbes`` sub-lists.
-        """
+
+        Raises:
+            RuntimeError: If the device is not found in the list of devices or if there is an error getting the status.
+        """  # noqa: DOC502
         return self._provider.get_device_information(device_identity, refresh_status)
 
     # ── Diagnostics ──────────────────────────────────────────────────────────
 
     def print_device_status(self, device_identity: int | str | None = None) -> str:
-        """Return a human-readable status string for one device or all devices."""
+        """Prints the status of a device or all devices.
+
+        Args:
+            device_identity (Optional (int | str | None), optional): The ID or name of the device to check. If None, checks all devices.
+
+        Returns:
+            device_info (str): A string representation of the device status.
+
+        Raises:
+            RuntimeError: If the device is not found in the list of devices.
+        """  # noqa: DOC502
         return self._provider.print_device_status(device_identity)
 
     def print_model_library(self, mode_str: str = "brief", model_id: str | None = None) -> str:
-        """Return a listing of known Shelly device models.
+        """Prints the Shelly model library.
 
         Args:
-            mode_str: ``"brief"`` (default) or ``"detailed"``.
-            model_id: If given, filter to one model.
+            mode_str (str, optional): The mode of printing. Can be "brief" or "detailed". Defaults to "brief".
+            model_id (Optional (str), optional): If provided, filters the models by this model name. If None, prints all models.
+
+        Returns:
+            library_info (str): A string representation of the Shelly model library.
         """
         return self._provider.print_model_library(mode_str, model_id)
 

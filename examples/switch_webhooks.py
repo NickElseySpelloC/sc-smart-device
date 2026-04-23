@@ -1,23 +1,13 @@
 """Example of using the SmartDevice control to handle webhooks."""
-# ruff: noqa: E402
-
 import platform
 import pprint
 import sys
 import threading
 import time
-from pathlib import Path
-
-# Allow running this script directly from a src/ layout checkout.
-_project_root = Path(__file__).resolve().parents[1]
-if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
-if str(_project_root / "src") not in sys.path:
-    sys.path.insert(0, str(_project_root / "src"))
 
 from sc_foundation import SCLogger
+from switch_init import switch_init
 
-from examples.switch_init import switch_init
 from sc_smart_device import SCSmartDevice
 
 
@@ -77,7 +67,7 @@ def main():
 
     # Initialize the configuration manager, logger, and SmartDevices control
     try:
-        _config, logger, smart_switch_control = switch_init(wake_event)
+        _config, logger, smart_switch_control = switch_init(wake_event=wake_event)
     except RuntimeError as e:
         print(f"Initialization error: {e}", file=sys.stderr)
         sys.exit(1)

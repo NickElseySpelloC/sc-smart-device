@@ -2,8 +2,10 @@
 import sys
 
 import pytest
+from mergedeep import merge
 from sc_foundation import SCConfigManager, SCLogger
 
+from examples.validation_extras import smart_switch_extra_validation
 from sc_smart_device import SCSmartDevice, SmartDeviceView, smart_devices_validator
 
 CONFIG_FILE = "tests/config.yaml"
@@ -11,11 +13,15 @@ DEVICE_CLIENTNAME = "Device Test 1"
 
 print("Running test for SCSmartDevice...")
 
+# Merge the SmartDevices validation schema with the default validation schema
+merged_schema = merge({}, smart_devices_validator, smart_switch_extra_validation)
+assert isinstance(merged_schema, dict), "Merged schema should be type dict"
+
 # Initialize the SC_ConfigManager class
 try:
     config = SCConfigManager(
         config_file=CONFIG_FILE,
-        validation_schema=smart_devices_validator,
+        validation_schema=merged_schema,
     )
 except RuntimeError as e:
     print(f"Configuration file error: {e}", file=sys.stderr)
@@ -105,6 +111,13 @@ def test_get_device_status():
     assert device_output is not None, "Device output should be found"
     assert device_output.get("State") is not None, "Device output state should be found"
     assert isinstance(device_output.get("State"), bool), "Device output state should be a boolean"
+    assert device_output.get("Group") is not None, "Device output group should be found"
+
+    # Test Group attribute for Device 1.Output 1
+    device_output_1 = smart_device.get_device_component("output", "Device 1.Output 1")
+    assert device_output_1 is not None, "Device output 1 should be found"
+    assert device_output_1.get("Group") is not None, "Device output 1 Group attribute should exist"
+    assert isinstance(device_output_1.get("Group"), str), "Device output 1 Group should be a string"
 
     device_meter = smart_device.get_device_component("meter", "Meter 1")  # Auto generated name
     assert device_meter is not None, "Device meter should be found"
@@ -296,6 +309,15 @@ def test_view_output_state():
         assert isinstance(state, bool), f"Output state for '{name}' should be a bool"
 
 
+def test_view_get_device_value():
+    """get_device_value() should resolve device ID to its value."""
+    view = smart_device.get_view()
+    for name in (OUTPUT_1_NAME, OUTPUT_2_NAME):
+        output_id = view.get_output_id(name)
+        value = view.get_output_value(output_id, key_name="Name")
+        assert value is not None, "Device should have a Name value"
+
+
 def test_view_output_state_invalid():
     """get_output_state() should raise IndexError for an unknown output ID."""
     view = smart_device.get_view()
@@ -406,3 +428,101 @@ def test_view_is_frozen_snapshot():
 
     # Restore original state
     smart_device.change_output(output_name, state_before)
+
+
+# ── get_X_value() tests ──────────────────────────────────────────────────────
+
+def test_view_get_device_value_standard_key():
+    """get_device_value() should return standard normalized fields by key name."""
+    view = smart_device.get_view()
+    # "Name" and "Online" are always present in the normalized device dict
+    assert view.get_device_value(DEVICE_ID, "Name") == DEVICE_CLIENTNAME
+    assert view.get_device_value(DEVICE_ID, "Online") is True  # simulation mode
+
+
+def test_view_get_device_value_missing_key():
+    """get_device_value() should return the default when the key is absent."""
+    view = smart_device.get_view()
+    assert view.get_device_value(DEVICE_ID, "NoSuchKey") is None
+    assert view.get_device_value(DEVICE_ID, "NoSuchKey", "fallback") == "fallback"
+    assert view.get_device_value(DEVICE_ID, "NoSuchKey", 42) == 42
+
+
+def test_view_get_device_value_invalid_id():
+    """get_device_value() should raise IndexError for an unknown device ID."""
+    view = smart_device.get_view()
+    with pytest.raises(IndexError):
+        view.get_device_value(999, "Name")
+
+
+def test_view_get_output_value_standard_key():
+    """get_output_value() should return standard normalized fields by key name."""
+    view = smart_device.get_view()
+    output_id = view.get_output_id(OUTPUT_1_NAME)
+    assert view.get_output_value(output_id, "Name") == OUTPUT_1_NAME
+    assert isinstance(view.get_output_value(output_id, "State"), bool)
+
+
+def test_view_get_output_value_missing_key():
+    """get_output_value() should return the default for absent keys (e.g. custom keys)."""
+    view = smart_device.get_view()
+    output_id = view.get_output_id(OUTPUT_1_NAME)
+    assert view.get_output_value(output_id, "Group") is None
+    assert view.get_output_value(output_id, "Group", "Ungrouped") == "Ungrouped"
+
+
+def test_view_get_output_value_invalid_id():
+    """get_output_value() should raise IndexError for an unknown output ID."""
+    view = smart_device.get_view()
+    with pytest.raises(IndexError):
+        view.get_output_value(999, "State")
+
+
+def test_view_get_input_value_standard_key():
+    """get_input_value() should return standard normalized fields by key name."""
+    view = smart_device.get_view()
+    input_id = view.get_input_id(INPUT_1_NAME)
+    assert view.get_input_value(input_id, "Name") == INPUT_1_NAME
+    assert isinstance(view.get_input_value(input_id, "State"), bool)
+
+
+def test_view_get_input_value_missing_key():
+    """get_input_value() should return the default for absent keys."""
+    view = smart_device.get_view()
+    input_id = view.get_input_id(INPUT_1_NAME)
+    assert view.get_input_value(input_id, "NoSuchKey") is None
+    assert view.get_input_value(input_id, "NoSuchKey", False) is False
+
+
+def test_view_get_input_value_invalid_id():
+    """get_input_value() should raise IndexError for an unknown input ID."""
+    view = smart_device.get_view()
+    with pytest.raises(IndexError):
+        view.get_input_value(999, "State")
+
+
+def test_view_get_meter_value_standard_key():
+    """get_meter_value() should return standard normalized fields by key name."""
+    view = smart_device.get_view()
+    meter_id = view.get_meter_id(METER_1_NAME)
+    assert view.get_meter_value(meter_id, "Name") == METER_1_NAME
+    # Voltage, Current, PowerFactor are in the normalized dict but have no dedicated getter
+    voltage = view.get_meter_value(meter_id, "Voltage")
+    assert voltage is None or isinstance(voltage, (int, float))
+    current = view.get_meter_value(meter_id, "Current")
+    assert current is None or isinstance(current, (int, float))
+
+
+def test_view_get_meter_value_missing_key():
+    """get_meter_value() should return the default for absent keys."""
+    view = smart_device.get_view()
+    meter_id = view.get_meter_id(METER_1_NAME)
+    assert view.get_meter_value(meter_id, "NoSuchKey") is None
+    assert view.get_meter_value(meter_id, "NoSuchKey", 0.0) == 0.0  # noqa: RUF069
+
+
+def test_view_get_meter_value_invalid_id():
+    """get_meter_value() should raise IndexError for an unknown meter ID."""
+    view = smart_device.get_view()
+    with pytest.raises(IndexError):
+        view.get_meter_value(999, "Power")

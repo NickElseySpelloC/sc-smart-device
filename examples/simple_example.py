@@ -1,23 +1,13 @@
-"""Example code using the sc_utility libraries. Should not be included in the distrbution."""
-# ruff: noqa: E402
+"""Example code using the SCSmartDevice library."""
 
 import platform
 import sys
 import threading
-from pathlib import Path
 
 from mergedeep import merge
-
-# Allow running this script directly from a src/ layout checkout.
-_project_root = Path(__file__).resolve().parents[1]
-if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
-if str(_project_root / "src") not in sys.path:
-    sys.path.insert(0, str(_project_root / "src"))
-
 from sc_foundation import SCConfigManager, SCLogger
+from validation_extras import smart_switch_extra_validation
 
-from examples.validation_extras import smart_switch_extra_validation
 from sc_smart_device import SCSmartDevice, smart_devices_validator
 
 CONFIG_FILE = "examples/switch_config.yaml"
@@ -77,9 +67,18 @@ def main():  # noqa: PLR0914, PLR0915
         device = smart_switch_control.get_device(device_identity)
     except (RuntimeError, TimeoutError) as e:
         print(e, file=sys.stderr)
-    else:
-        print(f"Device {device_identity} model: {device.get('Model', 'Unknown')}")
-        print(f"Device {device_identity} is {'online' if device.get('Online', False) else 'offline'}.")
+
+    # Print some details about the device
+    print(f"Device {device_identity} model: {device.get('Model', 'Unknown')}")
+    print(f"Device {device_identity} is {'online' if device.get('Online', False) else 'offline'}.")
+
+    # Get a custom attribute for a component (e.g. Group for an output)
+    try:
+        output_component = smart_switch_control.get_device_component("output", output_identity)
+        group = output_component.get("Group", "No Group")
+        print(f"Output {output_identity} group: {group}")
+    except RuntimeError as e:
+        print(f"Error getting component or attribute: {e}", file=sys.stderr)
 
     # Change the output of a device
     output = smart_switch_control.get_device_component("output", output_identity)

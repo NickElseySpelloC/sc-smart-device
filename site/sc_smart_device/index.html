@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://github.com/NickElseySpelloC/sc-smart-device/sc_smart_device/">
       
       
-        <link rel="prev" href="../shelly_models_list/">
+        <link rel="prev" href="../shelly_webhooks/">
       
       
         <link rel="next" href="../sc_smart_device_view/">
@@ -49,6 +49,8 @@
     
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -234,7 +236,34 @@
   <span class="md-ellipsis">
     
   
-    Configuration
+    Example Config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../example_code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Example Code
   
 
     
@@ -305,6 +334,60 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../shelly_temp_probes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shelly Temperature Probes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../shelly_webhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shelly Webhooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -318,10 +401,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -339,8 +422,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1503,6 +1586,39 @@ client apps require minimal changes.</p>
     </table>
 
 
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>There was an error changing the device output state.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TimeoutError">TimeoutError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the device is online (ping) but the state change request times out.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
     </div>
 
 </div>
@@ -1536,7 +1652,12 @@ client apps require minimal changes.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Return the internal device dict for the given ID, name, or dict.</p>
+        <p>Returns the device index for a given device ID or name.</p>
+<p>For device_identity you can pass:
+- A device object (dict) to retrieve it directly.
+- The device ID (int) to look it up by ID.
+- The device name (str) to look it up by name.
+- A component object (dict), which will return the parent device.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1559,13 +1680,57 @@ client apps require minimal changes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Device dict, integer ID, or name string.
-             A component dict is also accepted and returns the
-             parent device.</p>
+                <p>The identifier for the device.</p>
               </div>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>device</code></td>            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The device object if found.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the device is not found in the list of devices.</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -1587,7 +1752,7 @@ client apps require minimal changes.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Return the internal component dict for the given type and identity.</p>
+        <p>Returns a device component's index for a given component ID or name.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1610,8 +1775,7 @@ client apps require minimal changes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>One of <code>"input"</code>, <code>"output"</code>, <code>"meter"</code>,
-            or <code>"temp_probe"</code>.</p>
+                <p>The type of component to retrieve ('input', 'output', 'meter' or 'temp_probe').</p>
               </div>
             </td>
             <td>
@@ -1627,7 +1791,7 @@ client apps require minimal changes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Component ID (int) or name (str).</p>
+                <p>The ID or name of the component to retrieve.</p>
               </div>
             </td>
             <td>
@@ -1643,11 +1807,57 @@ client apps require minimal changes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If True, match by <code>ComponentIndex</code> instead of ID/name.</p>
+                <p>If True, lookup by index instead of ID or name.</p>
               </div>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>component</code></td>            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The component index if found.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the component is not found in the list.</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -1752,6 +1962,29 @@ client apps require minimal changes.</p>
     </table>
 
 
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the device is not found in the list of devices or if there is an error getting the status.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
     </div>
 
 </div>
@@ -1767,8 +2000,15 @@ client apps require minimal changes.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Return timezone/lat/lon for a Shelly device, or None.</p>
+        <p>Gets the timezone and location of a Shelly device if available.</p>
 
+
+<details class="returns-a-dict-in-the-following-format" open>
+  <summary>Returns a dict in the following format</summary>
+  <p>"tz": "Europe/Sofia",
+"lat": 42.67236,
+"lon": 23.38738</p>
+</details>
 
 <p><span class="doc-section-title">Parameters:</span></p>
     <table>
@@ -1790,11 +2030,67 @@ client apps require minimal changes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Device dict, ID, or name.</p>
+                <p>A device dict, or the ID or name of the device to check.</p>
               </div>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>location</code></td>            <td>
+                  <code><span title="dict">dict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary containing the timezone and location of the device, or None if not available.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the device is not found in the list of devices or if there is an error getting the status.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TimeoutError">TimeoutError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the device is online (ping) but the request times out while getting the device status.</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -1816,7 +2112,7 @@ client apps require minimal changes.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Refresh the status of one device from the hardware.</p>
+        <p>Gets the status of a Shelly device.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1839,7 +2135,7 @@ client apps require minimal changes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Device dict, ID, or name.</p>
+                <p>A device dict, or the ID or name of the device to check.</p>
               </div>
             </td>
             <td>
@@ -1854,6 +2150,29 @@ client apps require minimal changes.</p>
     <table>
       <thead>
         <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>result</code></td>            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True if the device is online, False otherwise.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
           <th>Type</th>
           <th>Description</th>
         </tr>
@@ -1861,11 +2180,21 @@ client apps require minimal changes.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="bool">bool</span></code>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>True if the device is online and status was retrieved.</p>
+                <p>If the device is not found in the list of devices or if there is an error getting the status.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TimeoutError">TimeoutError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the device is online (ping) but the request times out while getting the device status.</p>
               </div>
             </td>
           </tr>
@@ -2162,6 +2491,7 @@ to safely read device state without holding a lock.</p>
     <div class="doc doc-contents ">
 
         <p>Install a webhook on a device component.</p>
+<p>See https://nickelseyspelloc.github.io/sc-smart-device/shelly_webhooks/ for details on supported events and payloads.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2258,7 +2588,8 @@ to safely read device state without holding a lock.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Ping one device (or all devices) and return online status.</p>
+        <p>See if a device is alive by pinging it.</p>
+<p>Returns the result and updates the device's online status. If we are in simulation mode, always returns True.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2277,11 +2608,12 @@ to safely read device state without holding a lock.</p>
                 <code>device_identity</code>
             </td>
             <td>
-                  <code><span title="dict">dict</span> | <span title="int">int</span> | <span title="str">str</span> | None</code>
+                  <code><span title="Optional">Optional</span>(<span title="dict">dict</span> | <span title="int">int</span> | <span title="str">str</span> | None)</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Device to check, or None to check all.</p>
+                <p>The actual device object, device component object,
+        device ID or device name of the device to check. If None, checks all device.</p>
               </div>
             </td>
             <td>
@@ -2296,6 +2628,29 @@ to safely read device state without holding a lock.</p>
     <table>
       <thead>
         <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>result</code></td>            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True if the device is online, False otherwise. If all devices are checked, returns True if all device are online.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
           <th>Type</th>
           <th>Description</th>
         </tr>
@@ -2303,11 +2658,11 @@ to safely read device state without holding a lock.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="bool">bool</span></code>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>True if the selected device (or all devices) is online.</p>
+                <p>If the device is not found in the list of devices.</p>
               </div>
             </td>
           </tr>
@@ -2330,7 +2685,84 @@ to safely read device state without holding a lock.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Return a human-readable status string for one device or all devices.</p>
+        <p>Prints the status of a device or all devices.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>device_identity</code>
+            </td>
+            <td>
+                  <code><span title="Optional">Optional</span>(<span title="int">int</span> | <span title="str">str</span> | None)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ID or name of the device to check. If None, checks all devices.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>device_info</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A string representation of the device status.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the device is not found in the list of devices.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     </div>
@@ -2348,7 +2780,7 @@ to safely read device state without holding a lock.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Return a listing of known Shelly device models.</p>
+        <p>Prints the Shelly model library.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2371,7 +2803,7 @@ to safely read device state without holding a lock.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p><code>"brief"</code> (default) or <code>"detailed"</code>.</p>
+                <p>The mode of printing. Can be "brief" or "detailed". Defaults to "brief".</p>
               </div>
             </td>
             <td>
@@ -2383,15 +2815,38 @@ to safely read device state without holding a lock.</p>
                 <code>model_id</code>
             </td>
             <td>
-                  <code><span title="str">str</span> | None</code>
+                  <code><span title="Optional">Optional</span>(<span title="str">str</span>)</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If given, filter to one model.</p>
+                <p>If provided, filters the models by this model name. If None, prints all models.</p>
               </div>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>library_info</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A string representation of the Shelly model library.</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -2414,6 +2869,8 @@ to safely read device state without holding a lock.</p>
     <div class="doc doc-contents ">
 
         <p>Return the oldest queued webhook event and remove it from the queue.</p>
+<p>Use this if your app has been interrupted by a webhook event (your app_wake_event was set).
+This will return the earliest webhook event that was received and remove it from the queue.</p>
 
 
     <p><span class="doc-section-title">Returns:</span></p>
@@ -2482,7 +2939,32 @@ to safely read device state without holding a lock.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Refresh status for every configured device.</p>
+        <p>Refreshes the status of all Shelly devices.</p>
+<p>This function iterates through all devices and updates their status by calling get_device_status.
+It also calculates the total power and energy consumption for each device.</p>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If there is an error getting the status of any device.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     </div>

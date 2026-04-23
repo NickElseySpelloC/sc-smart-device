@@ -8,18 +8,19 @@ from sc_foundation import (
     SCConfigManager,
     SCLogger,
 )
+from validation_extras import smart_switch_extra_validation
 
-from examples.validation_extras import smart_switch_extra_validation
 from sc_smart_device import SCSmartDevice, smart_devices_validator
 
 CONFIG_FILE = "examples/switch_config.yaml"
 
 
-def switch_init(wake_event: threading.Event | None = None) -> tuple[SCConfigManager, SCLogger, SCSmartDevice]:
+def switch_init(wake_event: threading.Event | None = None, extra_validation: dict | None = None) -> tuple[SCConfigManager, SCLogger, SCSmartDevice]:
     """Create an instance of the SCConfigManager, SCLogger and SCSmartDevice class.
 
     Args:
         wake_event (threading.Event | None): Optional threading event to signal webhook events.
+        extra_validation (dict | None): Optional extra validation schema to merge with the default schema.
 
     Returns:
         tuple[SCConfigManager, SCLogger, SCSmartDevice]: A tuple containing the initialized SCConfigManager, SCLogger, and SCSmartDevice instances.
@@ -28,7 +29,7 @@ def switch_init(wake_event: threading.Event | None = None) -> tuple[SCConfigMana
         RuntimeError: If there is an error with the configuration file, logger initialization, or SCSmartDevice initialization.
     """
     # Merge the SmartDevices validation schema with the default validation schema
-    merged_schema = merge({}, smart_devices_validator, smart_switch_extra_validation)
+    merged_schema = merge({}, smart_devices_validator, smart_switch_extra_validation, extra_validation or {})
     assert isinstance(merged_schema, dict), "Merged schema should be type dict"
 
     # Initialize the SC_ConfigManager class

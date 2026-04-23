@@ -35,6 +35,8 @@ The ShellyWebhooks key in the configuration block supports the following keys :
 | Path | The URI path that webhooks will post to. |
 | DefaultWebhooks | The webhooks to install by default. See the example above for format. Look at the SupportedWebhooks key of an initialised Shelly device to see which webhook events your device supports. Use the  get_device() call to get a device object.  |
 
+> Please see the [Shelly Webhooks page](shelly_webhooks.md) for more information.
+
 ### Devices key
 
 The Devices key in the configuration block supports the following keys:
@@ -67,3 +69,66 @@ If you leave the configuration blank for a device's components, then the system 
 Due to the very large range of Tasmota devices on the market, it's not possible to maintain a library reference of each model and the type & number of components each model supports. 
 
 Therefore, you **must** configure each componenet in your YAML configuration as this will dictate the capabilities of the device.
+
+## Custom Attrbutes 
+
+You can add custom key/values to Devices, Inputs, Outputs and Meters if needed. For example you could add a Group name to each output switch:
+
+```yaml
+SCSmartDevices:
+  ...
+  Devices:
+    - Name: Downstairs Lights
+      Model: Shelly2PMG3
+      Hostname: 192.168.1.23
+      ID: 100
+      Inputs:
+        - Name: "Living Room Switch"
+          Webhooks: True
+        - Name: "Kitchen Switch"
+          Webhooks: True
+      Outputs:
+        - Name: "Living Room Relay"
+          Group: Inside
+        - Name: "Kitchen Relay"
+          Group: Inside
+    - Name: Outside Lights
+      Model: Shelly2PMG3
+      Hostname: 192.168.1.25
+      ID: 200
+      Inputs:
+        - Name: "Patio Switch"
+          Group: Outside
+        - Name: "Car Port Switch"
+          Group: Outside
+      Outputs:
+        - Name: "Patio Relay"
+        - Name: "Car Port Relay"
+    - Name: Testing
+      ...
+```
+
+If you add custom attributes, you will need to include them in yoour Ceribus validation dict passed to SCConfigManager(). This will be merged in with the default validation structure:
+
+```python
+    "SCSmartDevices": {
+        "schema": {
+            "Devices": {
+                "schema": {
+                    "schema": {
+                        "Outputs": {
+                            "schema": {
+                                "schema": {
+                                    "Group": {"type": "string", "required": False, "nullable": True},
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    }
+```
+
+
+These custom attrbutes will be printed by the print_device_status() function and available from the get_**() functions.
