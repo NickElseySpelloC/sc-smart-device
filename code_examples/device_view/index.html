@@ -8,28 +8,28 @@
       
       
       
-        <link rel="canonical" href="https://github.com/NickElseySpelloC/sc-smart-device/shelly_webhooks/">
+        <link rel="canonical" href="https://github.com/NickElseySpelloC/sc-smart-device/code_examples/device_view/">
       
       
-        <link rel="prev" href="../shelly_temp_probes/">
+        <link rel="prev" href="../webhooks/">
       
       
-        <link rel="next" href="../sc_smart_device/">
+        <link rel="next" href="../device_worker/">
       
       
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Shelly Webhooks - Spello Consulting Smart Device Library</title>
+        <title>Using thread safe views - Spello Consulting Smart Device Library</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
       
 
@@ -48,11 +48,11 @@
       
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -70,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#shelly-webhooks" class="md-skip">
+        <a href="#example-using-the-smartdeviceview" class="md-skip">
           Skip to content
         </a>
       
@@ -86,7 +86,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="Spello Consulting Smart Device Library" class="md-header__button md-logo" aria-label="Spello Consulting Smart Device Library" data-md-component="logo">
+    <a href="../.." title="Spello Consulting Smart Device Library" class="md-header__button md-logo" aria-label="Spello Consulting Smart Device Library" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -106,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Shelly Webhooks
+              Using thread safe views
             
           </span>
         </div>
@@ -184,7 +184,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="Spello Consulting Smart Device Library" class="md-nav__button md-logo" aria-label="Spello Consulting Smart Device Library" data-md-component="logo">
+    <a href="../.." title="Spello Consulting Smart Device Library" class="md-nav__button md-logo" aria-label="Spello Consulting Smart Device Library" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -202,7 +202,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -229,7 +229,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../example_config/" class="md-nav__link">
+      <a href="../../example_config/" class="md-nav__link">
         
   
   
@@ -253,20 +253,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -287,7 +287,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -305,7 +305,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../code_examples/simple_example/" class="md-nav__link">
+      <a href="../simple_example/" class="md-nav__link">
         
   
   
@@ -333,7 +333,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../code_examples/basic/" class="md-nav__link">
+      <a href="../basic/" class="md-nav__link">
         
   
   
@@ -361,7 +361,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../code_examples/energy_meters/" class="md-nav__link">
+      <a href="../energy_meters/" class="md-nav__link">
         
   
   
@@ -389,7 +389,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../code_examples/temp_probes/" class="md-nav__link">
+      <a href="../temp_probes/" class="md-nav__link">
         
   
   
@@ -417,7 +417,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../code_examples/webhooks/" class="md-nav__link">
+      <a href="../webhooks/" class="md-nav__link">
         
   
   
@@ -442,10 +442,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../code_examples/device_view/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using thread safe views
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -461,6 +488,48 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#module-to-initialise-the-scsmartdevice-instance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module to initialise the SCSmartDevice instance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example application
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -473,7 +542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../code_examples/device_worker/" class="md-nav__link">
+      <a href="../device_worker/" class="md-nav__link">
         
   
   
@@ -508,7 +577,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../objects/" class="md-nav__link">
+      <a href="../../objects/" class="md-nav__link">
         
   
   
@@ -535,7 +604,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../shelly_models_list/" class="md-nav__link">
+      <a href="../../shelly_models_list/" class="md-nav__link">
         
   
   
@@ -562,7 +631,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../shelly_temp_probes/" class="md-nav__link">
+      <a href="../../shelly_temp_probes/" class="md-nav__link">
         
   
   
@@ -586,37 +655,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Shelly Webhooks
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../shelly_webhooks/" class="md-nav__link">
         
   
   
@@ -632,37 +674,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#tasmota-devices" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Tasmota devices
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -723,7 +734,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sc_smart_device/" class="md-nav__link">
+      <a href="../../sc_smart_device/" class="md-nav__link">
         
   
   
@@ -751,7 +762,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sc_smart_device_view/" class="md-nav__link">
+      <a href="../../sc_smart_device_view/" class="md-nav__link">
         
   
   
@@ -779,7 +790,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sc_smart_device_worker/" class="md-nav__link">
+      <a href="../../sc_smart_device_worker/" class="md-nav__link">
         
   
   
@@ -834,10 +845,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#tasmota-devices" class="md-nav__link">
+  <a href="#module-to-initialise-the-scsmartdevice-instance" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tasmota devices
+        Module to initialise the SCSmartDevice instance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example application
       
     </span>
   </a>
@@ -861,24 +883,90 @@
 
 
 
-<h1 id="shelly-webhooks">Shelly webhooks</h1>
-<p>SCSmartDevices supports webhooks for Shelly smart switches. When enabled, a webhook server is started to listen for webhook events posted by a Shelly device. 
-For example, your application can be immediately notified when an input switch on a Shelly smart switch is turned on or off. </p>
-<p>The SupportedWebhooks attrbute of a device object lists the webhook events that each device supports (if any). See this page for documentation:
-https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/Webhook#webhookcreate</p>
-<p>To use webhooks you must:</p>
-<ol>
-<li>Properly configure the <a href="../example_config/#shellywebhooks-key">ShellyWebhooks section</a> of the SCSmartDevices configuration block.</li>
-<li>Have your client app running on a system that accepts inbound http connections on the IP address and port configured in the ShellyWebhooks section.</li>
-<li>Be using a Shelly device (typically Gen 3 or later) that supports wbhooks. </li>
-<li>Add the <em>Webhooks</em> key to a device's input of output configuration so that webhook handlers are installed for that component. </li>
-</ol>
-<p>Here's an example application:</p>
-<pre><code class="language-python">  &quot;&quot;&quot;Example of using the SmartDevice control to handle webhooks.&quot;&quot;&quot;
-  import platform
-  import pprint
-  import sys
+<h1 id="example-using-the-smartdeviceview">Example using the SmartDeviceView</h1>
+<p>Below is a example application using the <a href="../../sc_smart_device_view/">SmartDeviceView</a> class. This class provides a read-only, 
+thread safe copy of the device and component status information. It's typically used in conjunction
+with the <a href="../device_worker/">SmartDeviceWorker</a> class.</p>
+<h2 id="module-to-initialise-the-scsmartdevice-instance">Module to initialise the SCSmartDevice instance</h2>
+<p>See the <a href="../../example_config/">example config</a> page for the YAML configuration used by this example.</p>
+<pre><code class="language-python">  &quot;&quot;&quot;Manual testing code for the ShellyControl class.&quot;&quot;&quot;
+
   import threading
+
+  from mergedeep import merge
+  from sc_foundation import (
+      SCCommon,
+      SCConfigManager,
+      SCLogger,
+  )
+  from validation_extras import smart_switch_extra_validation
+
+  from sc_smart_device import SCSmartDevice, smart_devices_validator
+
+  CONFIG_FILE = &quot;examples/switch_config.yaml&quot;
+
+
+  def switch_init(wake_event: threading.Event | None = None, extra_validation: dict | None = None) -&gt; tuple[SCConfigManager, SCLogger, SCSmartDevice]:
+      &quot;&quot;&quot;Create an instance of the SCConfigManager, SCLogger and SCSmartDevice class.
+
+      Args:
+          wake_event (threading.Event | None): Optional threading event to signal webhook events.
+          extra_validation (dict | None): Optional extra validation schema to merge with the default schema.
+
+      Returns:
+          tuple[SCConfigManager, SCLogger, SCSmartDevice]: A tuple containing the initialized SCConfigManager, SCLogger, and SCSmartDevice instances.
+
+      Raises:
+          RuntimeError: If there is an error with the configuration file, logger initialization, or SCSmartDevice initialization.
+      &quot;&quot;&quot;
+      # Merge the SmartDevices validation schema with the default validation schema
+      merged_schema = merge({}, smart_devices_validator, smart_switch_extra_validation, extra_validation or {})
+      assert isinstance(merged_schema, dict), &quot;Merged schema should be type dict&quot;
+
+      # Initialize the SC_ConfigManager class
+      try:
+          config = SCConfigManager(
+              config_file=CONFIG_FILE,
+              validation_schema=merged_schema,
+          )
+      except RuntimeError as e:
+          error_msg = f&quot;Configuration file error: {e}&quot;
+          raise RuntimeError(error_msg) from e
+
+      # Initialize the SC_Logger class
+      try:
+          logger_settings = config.get_logger_settings()
+          logger = SCLogger(logger_settings)
+      except RuntimeError as e:
+          error_msg = f&quot;Logger initialisation error: {e}&quot;
+          raise RuntimeError(error_msg) from e
+
+      # Test internet connection
+      if not SCCommon.check_internet_connection():
+          logger.log_message(&quot;No internet connection detected.&quot;, &quot;error&quot;)
+
+      smart_switch_settings = config.get(&quot;SCSmartDevices&quot;)
+
+      if smart_switch_settings is None:
+          error_msg = &quot;No SmartDevices settings found in the configuration file.&quot;
+          raise RuntimeError(error_msg)
+
+      # Initialize the SCSmartDevice class
+      try:
+          smart_switch_control = SCSmartDevice(logger, smart_switch_settings, wake_event)
+      except RuntimeError as e:
+          error_msg = f&quot;SCSmartDevice initialization error: {e}&quot;
+          raise RuntimeError(error_msg) from e
+      logger.log_message(f&quot;SCSmartDevice initialized successfully with {len(smart_switch_control.devices)} devices.&quot;, &quot;summary&quot;)
+
+      return config, logger, smart_switch_control
+
+</code></pre>
+<h2 id="example-application">Example application</h2>
+<pre><code class="language-python">  &quot;&quot;&quot;Basic example of SmartDevice control.&quot;&quot;&quot;
+
+  import platform
+  import sys
   import time
 
   from sc_foundation import SCLogger
@@ -886,19 +974,21 @@ https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/Webhook#webhookc
 
   from sc_smart_device import SCSmartDevice
 
+  # ------- Uncomment the relevant section below to test different devices and meters -------
   # Test a Shelly switch
-  device_identity = &quot;Sydney Dev A&quot;
+  # device_identity = &quot;Sydney Dev A&quot;
+  # output_identity = &quot;Sydney Dev A O1&quot;
+  # meter_identity = &quot;Sydney Dev A M1&quot;
 
-  # Note: Webhooks are not supported on Tasmota devices, so no Tasmota test section for this example.
+  # Test a Tasmota switch
+  device_identity = &quot;Sydney Dev B&quot;
+  output_identity = &quot;Sydney Dev B O1&quot;
+  meter_identity = &quot;Sydney Dev B M1&quot;
 
 
-  def test_webhooks(logger: SCLogger, smart_switch_control: SCSmartDevice, wake_event: threading.Event):
-      &quot;&quot;&quot;Test function for webhooks SmartDevices control.&quot;&quot;&quot;
-      loop_delay = 2
-      loop_count = 0
-      max_loops = 20
-
-      logger.log_message(f&quot;\n\n\nTesting webhook functionality for device: {device_identity}&quot;, &quot;summary&quot;)
+  def test_basic(logger: SCLogger, smart_switch_control: SCSmartDevice) -&gt; None:
+      &quot;&quot;&quot;Test function for basic SmartSwitch control.&quot;&quot;&quot;
+      logger.log_message(f&quot;\n\n\nTesting basic functionality for device: {device_identity}&quot;, &quot;summary&quot;)
 
       # Get the device
       try:
@@ -907,59 +997,64 @@ https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/Webhook#webhookc
           if device_status:
               logger.log_message(f&quot;Device {device_identity} is online.&quot;, &quot;summary&quot;)
           else:
-              logger.log_message(f&quot;Device {device_identity} is offline or not found.&quot;, &quot;error&quot;)
+              logger.log_message(f&quot;Device {device_identity} is offline or not found.&quot;, &quot;summary&quot;)
       except RuntimeError as e:
           logger.log_message(f&quot;Error getting status for device {device_identity}: {e}&quot;, &quot;error&quot;)
           sys.exit(1)
       except TimeoutError as e:
           logger.log_message(f&quot;Timeout error getting status for device {device_identity}: {e}&quot;, &quot;error&quot;)
       else:
-          logger.log_message(f&quot;{device_identity} initial status:\n {smart_switch_control.print_device_status(device_identity)}&quot;, &quot;detailed&quot;)
+          logger.log_message(f&quot;{device_identity} before output change:\n {smart_switch_control.print_device_status(device_identity)}&quot;, &quot;detailed&quot;)
 
-          while loop_count &lt; max_loops:
-              logger.log_message(f&quot;Waiting for webhook events... (Loop {loop_count + 1}/{max_loops})&quot;, &quot;detailed&quot;)
+          # Get the output component and its current state
+          output_obj = smart_switch_control.get_device_component(&quot;output&quot;, output_identity)
+          is_online = smart_switch_control.is_device_online(device)
+          smart_switch_control.get_device_status(device)
+          current_state = output_obj.get(&quot;State&quot;, False)  # Default to False if State is not found
+          logger.log_message(f&quot;#1 Output status for {output_identity}: Is Online: {is_online}, Current State: {current_state}&quot;, &quot;detailed&quot;)
 
-              if wake_event.is_set():
-                  # We were woken by a webhook call
-                  while True:
-                      event = smart_switch_control.pull_webhook_event()
-                      if not event:
-                          break
+          # Change the output state to the opposite of the current state
+          logger.log_message(&quot;Waiting 3 seconds before changing the output state...&quot;, &quot;detailed&quot;)
+          for i in range(3):
+              time.sleep(1)  # Short delay to ensure the device is ready for the next command
+              print(f&quot;{i + 1}...&quot;, end=&quot;&quot;, flush=True)
+          logger.log_message(&quot;Attempting to change the output state...&quot;, &quot;detailed&quot;)
+          smart_switch_control.change_output(output_identity, not current_state)
 
-                      event_name = event.get(&quot;Event&quot;)
-                      event_device = event.get(&quot;Device&quot;, {}).get(&quot;Name&quot;)
-                      event_component = event.get(&quot;Component&quot;, {}).get(&quot;Name&quot;)
-                      logger.log_message(f&quot;Received webhook event: Name: {event_name}, Device: {event_device}, Component: {event_component}&quot;, &quot;detailed&quot;)
-                      event_str = pprint.pformat(event, indent=2)
-                      logger.log_message(f&quot;\nWebhook event detail: {event_str}\n&quot;, &quot;debug&quot;)
-                  wake_event.clear()
+          # Get the meter reading and output status again after the change
+          meter_obj = smart_switch_control.get_device_component(&quot;meter&quot;, meter_identity)
+          meter_reading = meter_obj.get(&quot;Energy&quot;, None)
+          logger.log_message(f&quot;Meter reading for {meter_identity}: {meter_reading}&quot;, &quot;detailed&quot;)
 
-              time.sleep(loop_delay)
-              loop_count += 1
+          # Get the latest device status to check if the output change was successful
+          is_online = smart_switch_control.is_device_online(device)
+          smart_switch_control.get_device_status(device)
+          current_state = output_obj.get(&quot;State&quot;, False)  # Default to False if State is not found
+          logger.log_message(f&quot;#2 Output status for {output_identity}: Is Online: {is_online}, Current State: {current_state}&quot;, &quot;detailed&quot;)
+
+          # Log the full device status after the change
+          logger.log_message(f&quot;{device_identity} after output change:\n {smart_switch_control.print_device_status(device_identity)}&quot;, &quot;detailed&quot;)
+          print(smart_switch_control.print_device_status(device_identity))
 
 
   def main():
       &quot;&quot;&quot;Main function to run the example code.&quot;&quot;&quot;
-      wake_event = threading.Event()
+      print(f&quot;Hello from switch_basic running on {platform.system()}&quot;)
 
-      print(f&quot;Hello from switch_webhooks running on {platform.system()}&quot;)
-
-      # Initialize the configuration manager, logger, and SmartDevices control
+      # Initialize the configuration manager, logger, and Smart_switch control
       try:
-          _config, logger, smart_switch_control = switch_init(wake_event=wake_event)
+          _config, logger, smart_switch_control = switch_init()
       except RuntimeError as e:
           print(f&quot;Initialization error: {e}&quot;, file=sys.stderr)
           sys.exit(1)
 
-      test_webhooks(logger, smart_switch_control, wake_event)
+      test_basic(logger, smart_switch_control)
 
 
   if __name__ == &quot;__main__&quot;:
       main()
 
 </code></pre>
-<h2 id="tasmota-devices">Tasmota devices</h2>
-<p>Tasmota ESP32 devices don't support webhooks, but they do support signalling to a client app via Matter (MQTT) events. This will be supported in a later version of this package.</p>
 
 
 
@@ -1009,10 +1104,10 @@ https://shelly-api-docs.shelly.cloud/gen2/ComponentsAndServices/Webhook#webhookc
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.expand"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.expand"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

@@ -255,9 +255,22 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../example_code/" class="md-nav__link">
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -271,7 +284,219 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Example Code
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_examples/simple_example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Simple example
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_examples/basic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic switch control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_examples/energy_meters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reading energy meters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_examples/temp_probes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reading temperature probes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_examples/webhooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using webhooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_examples/device_view/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using thread safe views
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_examples/device_worker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using threading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1244,8 +1469,8 @@
 
 
         <p>Unified smart-device controller.</p>
-<p>Aggregates one or more hardware providers (currently :class:<code>ShellyProvider</code>
-and :class:<code>TasmotaProvider</code>) behind a single, stable public API.  Client
+<p>Aggregates one or more hardware providers (currently <code>ShellyProvider</code>
+and <code>TasmotaProvider</code>) behind a single, stable public API.  Client
 apps should never depend on a provider class directly.</p>
 
 
@@ -2533,7 +2758,7 @@ to safely read device state without holding a lock.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Component dict (from :meth:<code>get_device_component</code>).</p>
+                <p>Component dict (from <a class="autorefs autorefs-internal" title="get_device_component(component_type, component_identity, use_index=None)" href="#sc_smart_device.SCSmartDevice.get_device_component">get_device_component</a>).</p>
               </div>
             </td>
             <td>
@@ -2922,7 +3147,7 @@ to safely read device state without holding a lock.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Alias for :meth:<code>refresh_all_device_statuses</code>.</p>
+        <p>Alias for <a class="autorefs autorefs-internal" title="refresh_all_device_statuses()" href="#sc_smart_device.SCSmartDevice.refresh_all_device_statuses">refresh_all_device_statuses</a>.</p>
 
 
     </div>
