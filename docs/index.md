@@ -37,9 +37,9 @@ Or better yet, use UV:
 
 The library uses a YAML file for configuration. An example config file (examples/switch_config.yaml) is included in this package. See the [example config page](example_config.md) for the yaml example and a reference for each section.
 
-## Example Code
+## Code Examples
 
-See the [Example Code](example_code.md) page for an example app. See the _/examples_ folder for more examples.
+See the **Example Code** navigation on the left for various code examples.
 
 ## API Reference
 

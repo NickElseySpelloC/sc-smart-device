@@ -4,6 +4,6 @@ Below is an example application using the SCSmartDevices() class. See the _/exam
 
 ```python
   {%
-    include "../examples/simple_example.py"
+    include "../../examples/simple_example.py"
   %}
 ```

@@ -1319,3 +1319,286 @@ Testing basic functionality for device: Sydney Dev B
   MAC: 7C:2C:67:D7:F5:50  Uptime: 6T00:44:04
   TotalPower: 25.0W  TotalEnergy: 18.0Wh
   Webhooks: not supported
+2026-04-24 17:02:53: SCSmartDevice initialized successfully with 4 devices.
+2026-04-24 17:02:53: 
+
+
+Starting SmartDeviceWorker sequence example
+2026-04-24 17:02:53: SmartDeviceWorker started
+2026-04-24 17:02:53: Worker thread started.
+2026-04-24 17:02:53: Initial device state (from worker snapshot):
+2026-04-24 17:02:53:   Sydney Dev A: online=True  |  Sydney Dev A O1=ON, Sydney Dev A O2=ON
+2026-04-24 17:02:53:   Sydney Solar: online=True  |  Solar Pump Output=OFF, Solar Valve Output=OFF
+2026-04-24 17:02:53:   Sydney Panel EM1: online=True  |  Sydney Panel EM1 O1=OFF
+2026-04-24 17:02:53:   Sydney Dev B: online=True  |  Sydney Dev B O1=OFF
+2026-04-24 17:02:53: Submitting sequence 'switch_worker_demo' (8 steps)...
+2026-04-24 17:02:53 WARNING: Requested changing output Sydney Dev A O1 to True but it was already in that state.
+2026-04-24 17:03:09: Sequence 'switch_worker_demo' completed successfully in 15.7s.
+2026-04-24 17:03:09: Final device state (from fresh view):
+2026-04-24 17:03:09:   Sydney Dev A: online=True  |  Sydney Dev A O1=OFF, Sydney Dev A O2=ON
+2026-04-24 17:03:09:   Sydney Solar: online=True  |  Solar Pump Output=OFF, Solar Valve Output=OFF
+2026-04-24 17:03:09:   Sydney Panel EM1: online=True  |  Sydney Panel EM1 O1=OFF
+2026-04-24 17:03:09:   Sydney Dev B: online=True  |  Sydney Dev B O1=OFF
+2026-04-24 17:03:09: SmartDeviceWorker shutdown complete.
+2026-04-24 17:03:09: Worker thread stopped.
+2026-04-24 17:14:16: SCSmartDevice initialized successfully with 4 devices.
+2026-04-24 17:14:16: Worker thread started.
+2026-04-24 17:14:16: SmartDeviceWorker started
+2026-04-24 17:14:16: 
+
+
+Starting SmartDeviceWorker sequence example
+2026-04-24 17:14:16: Initial device state (from worker snapshot):
+2026-04-24 17:14:16:   Sydney Dev A: online=True  |  Sydney Dev A O1=OFF, Sydney Dev A O2=ON
+2026-04-24 17:14:16:   Sydney Solar: online=True  |  Solar Pump Output=OFF, Solar Valve Output=OFF
+2026-04-24 17:14:16:   Sydney Panel EM1: online=True  |  Sydney Panel EM1 O1=OFF
+2026-04-24 17:14:16:   Sydney Dev B: online=True  |  Sydney Dev B O1=OFF
+2026-04-24 17:14:16: Submitting sequence 'switch_worker_demo' (8 steps)...
+2026-04-24 17:14:32: Sequence 'switch_worker_demo' completed successfully in 15.7s.
+2026-04-24 17:14:32: Final device state (from fresh view):
+2026-04-24 17:14:32:   Sydney Dev A: online=True  |  Sydney Dev A O1=OFF, Sydney Dev A O2=ON
+2026-04-24 17:14:32:   Sydney Solar: online=True  |  Solar Pump Output=OFF, Solar Valve Output=OFF
+2026-04-24 17:14:32:   Sydney Panel EM1: online=True  |  Sydney Panel EM1 O1=OFF
+2026-04-24 17:14:32:   Sydney Dev B: online=True  |  Sydney Dev B O1=OFF
+2026-04-24 17:14:33: SmartDeviceWorker shutdown complete.
+2026-04-24 17:14:33: Worker thread stopped.
+2026-04-24 18:01:59: SCSmartDevice initialized successfully with 4 devices.
+2026-04-24 18:01:59: 
+
+
+Testing basic functionality for device: Sydney Dev A
+2026-04-24 18:01:59: Device Sydney Dev A is online.
+2026-04-24 18:01:59: Sydney Dev A before output change:
+ Sydney Dev A (ID: 1) — online
+  Model: Shelly 2PM Gen3
+  Simulation: False
+  Hostname: 192.168.86.30:80
+  ExpectOffline: True
+  Generation: 3 / Protocol: RPC
+  Inputs (2):
+    [0] id=1 name='Sydney Dev A I1' state=False
+    [1] id=2 name='Sydney Dev A I2' state=False
+  Outputs (2):
+    [0] id=1 name='Sydney Dev A O1' state=False temp=60.9, Group: Living Room
+    [1] id=2 name='Sydney Dev A O2' state=True temp=60.9, Group: Living Room
+  Meters (2):
+    [0] id=1 name='Sydney Dev A M1' power=0.0W voltage=239.5V energy=102417.0Wh
+    [1] id=2 name='Sydney Dev A M2' power=0.0W voltage=239.6V energy=0.0Wh
+  TempProbes (1):
+    [0] id=1 name='Sydney Dev A' temp=60.9°C  last_read=2026-04-24 18:01:59.192605+10:00
+  MAC: 30C9224E065C  Uptime: 97771s  Temp: 60.9°C
+  TotalPower: 0W  TotalEnergy: 102417.0Wh
+  Supported Webhooks: 10
+    - input.toggle_on
+    - input.toggle_off
+    - input.button_push
+    - input.button_longpush
+    - input.button_doublepush
+    - input.button_triplepush
+    - input.analog_change
+    - input.analog_measurement
+    - switch.off
+    - switch.on
+  No installed webhooks found.
+2026-04-24 18:01:59: #1 Output status for Sydney Dev A O1: Is Online: True, Current State: False
+2026-04-24 18:01:59: Waiting 3 seconds before changing the output state...
+2026-04-24 18:02:02: Attempting to change the output state...
+2026-04-24 18:02:02: Meter reading for Sydney Dev A M1: 102417.0
+2026-04-24 18:02:02: #2 Output status for Sydney Dev A O1: Is Online: True, Current State: True
+2026-04-24 18:02:02: Sydney Dev A after output change:
+ Sydney Dev A (ID: 1) — online
+  Model: Shelly 2PM Gen3
+  Simulation: False
+  Hostname: 192.168.86.30:80
+  ExpectOffline: True
+  Generation: 3 / Protocol: RPC
+  Inputs (2):
+    [0] id=1 name='Sydney Dev A I1' state=False
+    [1] id=2 name='Sydney Dev A I2' state=False
+  Outputs (2):
+    [0] id=1 name='Sydney Dev A O1' state=True temp=61.1, Group: Living Room
+    [1] id=2 name='Sydney Dev A O2' state=True temp=61.1, Group: Living Room
+  Meters (2):
+    [0] id=1 name='Sydney Dev A M1' power=0.0W voltage=239.1V energy=102417.0Wh
+    [1] id=2 name='Sydney Dev A M2' power=0.0W voltage=239.2V energy=0.0Wh
+  TempProbes (1):
+    [0] id=1 name='Sydney Dev A' temp=61.1°C  last_read=2026-04-24 18:02:02.547471+10:00
+  MAC: 30C9224E065C  Uptime: 97774s  Temp: 61.1°C
+  TotalPower: 0W  TotalEnergy: 102417.0Wh
+  Supported Webhooks: 10
+    - input.toggle_on
+    - input.toggle_off
+    - input.button_push
+    - input.button_longpush
+    - input.button_doublepush
+    - input.button_triplepush
+    - input.analog_change
+    - input.analog_measurement
+    - switch.off
+    - switch.on
+  No installed webhooks found.
+2026-04-24 18:03:11: SCSmartDevice initialized successfully with 4 devices.
+2026-04-24 18:03:11: 
+
+
+Testing basic functionality for device: Sydney Dev A
+2026-04-24 18:03:11: Device Sydney Dev A is online.
+2026-04-24 18:03:11: Sydney Dev A before output change:
+ Sydney Dev A (ID: 1) — online
+  Model: Shelly 2PM Gen3
+  Simulation: False
+  Hostname: 192.168.86.30:80
+  ExpectOffline: True
+  Generation: 3 / Protocol: RPC
+  Inputs (2):
+    [0] id=1 name='Sydney Dev A I1' state=False
+    [1] id=2 name='Sydney Dev A I2' state=False
+  Outputs (2):
+    [0] id=1 name='Sydney Dev A O1' state=True temp=61.5, Group: Living Room
+    [1] id=2 name='Sydney Dev A O2' state=True temp=61.5, Group: Living Room
+  Meters (2):
+    [0] id=1 name='Sydney Dev A M1' power=0.0W voltage=239.7V energy=102417.0Wh
+    [1] id=2 name='Sydney Dev A M2' power=0.0W voltage=239.8V energy=0.0Wh
+  TempProbes (1):
+    [0] id=1 name='Sydney Dev A' temp=61.5°C  last_read=2026-04-24 18:03:11.592414+10:00
+  MAC: 30C9224E065C  Uptime: 97843s  Temp: 61.5°C
+  TotalPower: 0W  TotalEnergy: 102417.0Wh
+  Supported Webhooks: 10
+    - input.toggle_on
+    - input.toggle_off
+    - input.button_push
+    - input.button_longpush
+    - input.button_doublepush
+    - input.button_triplepush
+    - input.analog_change
+    - input.analog_measurement
+    - switch.off
+    - switch.on
+  No installed webhooks found.
+2026-04-24 18:03:11: #1 Output status for Sydney Dev A O1: Is Online: True, Current State: True
+2026-04-24 18:03:11: Waiting 3 seconds before changing the output state...
+2026-04-24 18:03:14: Attempting to change the output state...
+2026-04-24 18:03:14: Output status for Sydney Dev A O2 after changing Sydney Dev A O1: Current State: True
+2026-04-24 18:03:14: Meter reading for Sydney Dev A M1: 102417.0
+2026-04-24 18:03:14: #2 Output status for Sydney Dev A O1: Is Online: True, Current State: False
+2026-04-24 18:03:14: Sydney Dev A after output change:
+ Sydney Dev A (ID: 1) — online
+  Model: Shelly 2PM Gen3
+  Simulation: False
+  Hostname: 192.168.86.30:80
+  ExpectOffline: True
+  Generation: 3 / Protocol: RPC
+  Inputs (2):
+    [0] id=1 name='Sydney Dev A I1' state=False
+    [1] id=2 name='Sydney Dev A I2' state=False
+  Outputs (2):
+    [0] id=1 name='Sydney Dev A O1' state=False temp=61.6, Group: Living Room
+    [1] id=2 name='Sydney Dev A O2' state=True temp=61.6, Group: Living Room
+  Meters (2):
+    [0] id=1 name='Sydney Dev A M1' power=0.0W voltage=240.1V energy=102417.0Wh
+    [1] id=2 name='Sydney Dev A M2' power=0.0W voltage=240.2V energy=0.0Wh
+  TempProbes (1):
+    [0] id=1 name='Sydney Dev A' temp=61.6°C  last_read=2026-04-24 18:03:14.825140+10:00
+  MAC: 30C9224E065C  Uptime: 97847s  Temp: 61.6°C
+  TotalPower: 0W  TotalEnergy: 102417.0Wh
+  Supported Webhooks: 10
+    - input.toggle_on
+    - input.toggle_off
+    - input.button_push
+    - input.button_longpush
+    - input.button_doublepush
+    - input.button_triplepush
+    - input.analog_change
+    - input.analog_measurement
+    - switch.off
+    - switch.on
+  No installed webhooks found.
+2026-04-24 18:04:19: SCSmartDevice initialized successfully with 4 devices.
+2026-04-24 18:04:19: 
+
+
+Testing basic functionality for device: Sydney Dev B
+2026-04-24 18:04:19: Device Sydney Dev B is online.
+2026-04-24 18:04:19: Sydney Dev B before output change:
+ Sydney Dev B (ID: 2) — online
+  Model: Tasmota  Firmware: 13.1.0(tasmota32)
+  Simulation: False
+  Hostname: 192.168.86.37:80
+  ExpectOffline: True
+  Outputs (1):
+    [0] id=3 name='Sydney Dev B O1' state=False, Group: Dining Room
+  Meters (1):
+    [0] id=3 name='Sydney Dev B M1' power=0W voltage=246V energy=19.0Wh
+  TempProbes (1):
+    [0] id=2 name='Sydney Dev B' temp=None°C
+  MAC: 7C:2C:67:D7:F5:50  Uptime: 7T01:15:45
+  TotalPower: 0.0W  TotalEnergy: 19.0Wh
+  Webhooks: not supported
+2026-04-24 18:04:19: #1 Output status for Sydney Dev B O1: Is Online: True, Current State: False
+2026-04-24 18:04:19: Waiting 3 seconds before changing the output state...
+2026-04-24 18:04:22: Attempting to change the output state...
+2026-04-24 18:07:59: SCSmartDevice initialized successfully with 4 devices.
+2026-04-24 18:07:59: 
+
+
+Testing basic functionality for device: Sydney Dev B
+2026-04-24 18:07:59: Device Sydney Dev B is online.
+2026-04-24 18:07:59: Sydney Dev B before output change:
+ Sydney Dev B (ID: 2) — online
+  Model: Tasmota  Firmware: 13.1.0(tasmota32)
+  Simulation: False
+  Hostname: 192.168.86.37:80
+  ExpectOffline: True
+  Outputs (1):
+    [0] id=3 name='Sydney Dev B O1' state=True, Group: Dining Room
+  Meters (1):
+    [0] id=3 name='Sydney Dev B M1' power=25W voltage=245V energy=21.0Wh
+  TempProbes (1):
+    [0] id=2 name='Sydney Dev B' temp=None°C
+  MAC: 7C:2C:67:D7:F5:50  Uptime: 7T01:19:24
+  TotalPower: 25.0W  TotalEnergy: 21.0Wh
+  Webhooks: not supported
+2026-04-24 18:07:59: #1 Output status for Sydney Dev B O1: Is Online: True, Current State: True
+2026-04-24 18:07:59: Waiting 3 seconds before changing the output state...
+2026-04-24 18:08:02: Attempting to change the output state...
+2026-04-24 18:08:35: SCSmartDevice initialized successfully with 4 devices.
+2026-04-24 18:08:35: 
+
+
+Testing basic functionality for device: Sydney Dev B
+2026-04-24 18:08:35: Device Sydney Dev B is online.
+2026-04-24 18:08:35: Sydney Dev B before output change:
+ Sydney Dev B (ID: 2) — online
+  Model: Tasmota  Firmware: 13.1.0(tasmota32)
+  Simulation: False
+  Hostname: 192.168.86.37:80
+  ExpectOffline: True
+  Outputs (1):
+    [0] id=3 name='Sydney Dev B O1' state=True, Group: Dining Room
+  Meters (1):
+    [0] id=3 name='Sydney Dev B M1' power=25W voltage=246V energy=21.0Wh
+  TempProbes (1):
+    [0] id=2 name='Sydney Dev B' temp=None°C
+  MAC: 7C:2C:67:D7:F5:50  Uptime: 7T01:20:00
+  TotalPower: 25.0W  TotalEnergy: 21.0Wh
+  Webhooks: not supported
+2026-04-24 18:08:35: #1 Output status for Sydney Dev B O1: Is Online: True, Current State: True
+2026-04-24 18:08:35: Waiting 3 seconds before changing the output state...
+2026-04-24 18:08:38: Attempting to change the output state...
+2026-04-24 18:08:38: Meter reading for Sydney Dev B M1: 21.0
+2026-04-24 18:08:38: #2 Output status for Sydney Dev B O1: Is Online: True, Current State: False
+2026-04-24 18:08:38: Sydney Dev B after output change:
+ Sydney Dev B (ID: 2) — online
+  Model: Tasmota  Firmware: 13.1.0(tasmota32)
+  Simulation: False
+  Hostname: 192.168.86.37:80
+  ExpectOffline: True
+  Outputs (1):
+    [0] id=3 name='Sydney Dev B O1' state=False, Group: Dining Room
+  Meters (1):
+    [0] id=3 name='Sydney Dev B M1' power=25W voltage=245V energy=21.0Wh
+  TempProbes (1):
+    [0] id=2 name='Sydney Dev B' temp=None°C
+  MAC: 7C:2C:67:D7:F5:50  Uptime: 7T01:20:03
+  TotalPower: 25.0W  TotalEnergy: 21.0Wh
+  Webhooks: not supported

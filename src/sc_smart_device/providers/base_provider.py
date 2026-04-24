@@ -77,25 +77,29 @@ class BaseProvider(ABC):
 
     # ── Optional / provider-specific — default no-op implementations ─────────
 
-    def does_device_have_webhooks(self, device: dict) -> bool:
+    def does_device_have_webhooks(self, _device: dict) -> bool:  # noqa: PLR6301
         """Return True if any component of the device has webhooks enabled."""
         return False
 
     def install_webhook(
         self,
-        event: str,
-        component: dict,
-        url: str | None = None,
-        additional_payload: dict | None = None,
+        _event: str,
+        _component: dict,
+        _url: str | None = None,
+        _additional_payload: dict | None = None,
     ) -> None:
-        """Install a webhook. Raises RuntimeError if not supported by this provider."""
+        """Install a webhook.
+
+        Raises:
+            RuntimeError: If webhooks are not supported by this provider.
+        """
         msg = f"{type(self).__name__} does not support webhooks."
         raise RuntimeError(msg)
 
-    def pull_webhook_event(self) -> dict | None:
+    def pull_webhook_event(self) -> dict | None:  # noqa: PLR6301
         """Return the oldest queued webhook event, or None."""
         return None
 
-    def print_model_library(self, mode_str: str = "brief", model_id: str | None = None) -> str:
+    def print_model_library(self, _mode_str: str = "brief", _model_id: str | None = None) -> str:  # noqa: PLR6301
         """Return a human-readable summary of supported hardware models."""
         return ""

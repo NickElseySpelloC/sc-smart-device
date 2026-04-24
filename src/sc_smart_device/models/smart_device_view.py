@@ -66,7 +66,11 @@ class SmartDeviceView:
         default: Any,
         id_label: str,
     ) -> Any:
-        """Shared implementation for all get_X_value() methods."""
+        """Shared implementation for all get_X_value() methods.
+
+        Returns:
+            The value for ``key_name`` from the indexed item, or ``default``.
+        """
         if item_id not in index:
             self._raise_index_error(f"Invalid {id_label} ID: {item_id}")
         return index[item_id].get(key_name, default)

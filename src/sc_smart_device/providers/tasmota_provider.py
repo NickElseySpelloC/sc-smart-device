@@ -8,7 +8,6 @@ API convention: ``GET http://<host>/cm?cmnd=<command>``
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING, NoReturn
 from urllib.parse import quote
 
@@ -20,7 +19,7 @@ from sc_smart_device.models.smart_device_status import SmartDeviceStatus
 from sc_smart_device.providers.base_provider import BaseProvider
 
 if TYPE_CHECKING:
-    pass
+    from pathlib import Path
 
 TASMOTA_MODEL = "Tasmota"
 
@@ -83,7 +82,7 @@ class TasmotaProvider(BaseProvider):
     def set_output(self, output_identity: dict | int | str, new_state: bool) -> tuple[bool, bool]:
         return self._change_output(output_identity, new_state)
 
-    def get_device_location(self, device_identity: dict | int | str) -> dict | None:
+    def get_device_location(self, _device_identity: dict | int | str) -> dict | None:  # noqa: PLR6301
         return None  # Tasmota does not expose location/timezone info
 
     def start_services(self) -> None:
@@ -114,12 +113,14 @@ class TasmotaProvider(BaseProvider):
                 for device in self._devices:
                     if device["ID"] == device_id:
                         return device
-                raise RuntimeError(f"Device with ID {device_id!r} not found in TasmotaProvider.")
+                msg = f"Device with ID {device_id!r} not found in TasmotaProvider."
+                raise RuntimeError(msg)
             return self.get_device(device_identity["DeviceID"])
         for device in self._devices:
             if device["ID"] == device_identity or device["Name"] == device_identity:
                 return device
-        raise RuntimeError(f"Device {device_identity!r} not found.")
+        msg = f"Device {device_identity!r} not found."
+        raise RuntimeError(msg)
 
     def get_device_component(
         self,
@@ -131,7 +132,7 @@ class TasmotaProvider(BaseProvider):
 
         Raises:
             RuntimeError: If ``component_type`` is ``"input"`` (unsupported), invalid, or not found.
-        """
+        """  # noqa: DOC502
         if component_type == "input":
             self._raise_runtime_error("Tasmota devices do not support input components.")
         lists: dict[str, list[dict]] = {
@@ -147,6 +148,7 @@ class TasmotaProvider(BaseProvider):
             if component["ID"] == component_identity or component["Name"] == component_identity:
                 return component
         self._raise_runtime_error(f"{component_type} {component_identity!r} not found.")
+        return None
 
     def is_device_online(self, device_identity: dict | int | str | None = None) -> bool:
         found_offline = False
@@ -167,25 +169,25 @@ class TasmotaProvider(BaseProvider):
             raise RuntimeError(e) from e
         return not found_offline
 
-    def does_device_have_webhooks(self, device: dict) -> bool:
+    def does_device_have_webhooks(self, _device: dict) -> bool:  # noqa: PLR6301
         return False  # Tasmota webhooks not supported
 
     def install_webhook(
         self,
-        event: str,
-        component: dict,
-        url: str | None = None,
-        additional_payload: dict | None = None,
+        _event: str,
+        _component: dict,
+        _url: str | None = None,
+        _additional_payload: dict | None = None,
     ) -> None:
         self._raise_runtime_error("Tasmota devices do not support webhooks.")
 
-    def pull_webhook_event(self) -> dict | None:
+    def pull_webhook_event(self) -> dict | None:  # noqa: PLR6301
         return None
 
-    def print_model_library(self, mode_str: str = "brief", model_id: str | None = None) -> str:
+    def print_model_library(self, _mode_str: str = "brief", _model_id: str | None = None) -> str:  # noqa: PLR6301
         return ""  # Tasmota has no model file — config-driven
 
-    def print_device_status(self, device_identity: int | str | None = None) -> str:  # noqa: PLR0912
+    def print_device_status(self, device_identity: int | str | None = None) -> str:
         device_index = None
         return_str = ""
         try:
@@ -270,7 +272,7 @@ class TasmotaProvider(BaseProvider):
             if str(device_cfg.get("Model")) == TASMOTA_MODEL:
                 self._add_device(device_cfg)
 
-    def _add_device(self, device_config: dict) -> None:  # noqa: PLR0912
+    def _add_device(self, device_config: dict) -> None:
         # Inputs block is explicitly forbidden for Tasmota devices
         if device_config.get("Inputs"):
             self._raise_runtime_error(
@@ -336,10 +338,10 @@ class TasmotaProvider(BaseProvider):
             )
 
         # Absorb custom keys from config (anything not already in the device dict)
-        _skip_keys = {"Outputs", "Meters", "TempProbes", "Inputs", "Tasmota"}
+        skip_keys = {"Outputs", "Meters", "TempProbes", "Inputs", "Tasmota"}
         known_keys = set(new_device.keys())
         for key, value in device_config.items():
-            if key not in known_keys and key not in _skip_keys:
+            if key not in known_keys and key not in skip_keys:
                 new_device[key] = value
                 new_device["customkeylist"].append(key)
 
@@ -405,7 +407,7 @@ class TasmotaProvider(BaseProvider):
 
 # ── Device status ─────────────────────────────────────────────────────────────
 
-    def _get_device_status(self, device_identity: dict | int | str) -> bool:  # noqa: PLR0912
+    def _get_device_status(self, device_identity: dict | int | str) -> bool:
         device = self.get_device(device_identity)
 
         if device["Simulate"]:
@@ -461,7 +463,7 @@ class TasmotaProvider(BaseProvider):
             for tp in self._temp_probes:
                 if tp["DeviceIndex"] != device["Index"]:
                     continue
-                for _sensor_name, sensor_data in status_sns.items():
+                for sensor_data in status_sns.values():
                     if isinstance(sensor_data, dict) and "Temperature" in sensor_data:
                         tp["Temperature"] = sensor_data["Temperature"]
                         break
@@ -511,7 +513,8 @@ class TasmotaProvider(BaseProvider):
         try:
             result, result_data = self._http_request(device, cmd)
         except (TimeoutError, RuntimeError) as e:
-            raise RuntimeError(f"Error setting Tasmota output {output['Name']!r}: {e}") from e
+            msg = f"Error setting Tasmota output {output['Name']!r}: {e}"
+            raise RuntimeError(msg) from e
 
         if not result:
             return False, False
@@ -547,14 +550,22 @@ class TasmotaProvider(BaseProvider):
 # ── HTTP transport ────────────────────────────────────────────────────────────
 
     def _http_request(self, device: dict, command: str) -> tuple[bool, dict]:
-        """Send a Tasmota HTTP command. Returns ``(success, response_dict)``."""
+        """Send a Tasmota HTTP command.
+
+        Returns:
+            Tuple of ``(success, response_dict)``.
+
+        Raises:
+            TimeoutError: If the request times out.
+        """
         url = f"http://{device['Hostname']}:{device['Port']}/cm?cmnd={quote(command)}"
         try:
             response = requests.get(url, timeout=self.response_timeout)
             response.raise_for_status()
             return True, response.json()
         except requests.exceptions.Timeout as e:
-            raise TimeoutError(f"Tasmota request timed out: {url}") from e
+            msg = f"Tasmota request timed out: {url}"
+            raise TimeoutError(msg) from e
         except requests.exceptions.ConnectionError as e:
             self.logger.log_message(
                 f"Connection error for {device['Label']}: {e}", "error"
@@ -571,20 +582,20 @@ class TasmotaProvider(BaseProvider):
 
 # ── Simulation I/O ────────────────────────────────────────────────────────────
 
-    def _get_simulation_file_path(self, device: dict) -> Path:
+    @staticmethod
+    def _get_simulation_file_path(device: dict) -> Path:
         return device["SimulationFile"]  # type: ignore[return-value]
 
-    def _import_device_information_from_json(
-        self, device: dict, create_if_no_file: bool
-    ) -> bool:
+    def _import_device_information_from_json(self, device: dict, create_if_no_file: bool) -> bool:  # noqa: PLR0912
         if not device.get("Simulate"):
             return False
         file_path = self._get_simulation_file_path(device)
         if not file_path.exists():
             if create_if_no_file:
                 return self._export_device_information_to_json(device)
-            raise RuntimeError(f"Simulation file {file_path} not found.")
-        try:
+            msg = f"Simulation file {file_path} not found."
+            raise RuntimeError(msg)
+        try:  # noqa: PLR1702
             with file_path.open("r", encoding="utf-8") as f:
                 device_info = json.load(f)
             device["Online"] = True

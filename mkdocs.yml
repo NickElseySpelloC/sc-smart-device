@@ -25,7 +25,14 @@ plugins:
 nav:
   - Home: index.md
   - Example Config: example_config.md
-  - Example Code: example_code.md
+  - Example Code: 
+      - Simple example: code_examples/simple_example.md
+      - Basic switch control: code_examples/basic.md
+      - Reading energy meters: code_examples/energy_meters.md
+      - Reading temperature probes: code_examples/temp_probes.md
+      - Using webhooks: code_examples/webhooks.md
+      - Using thread safe views: code_examples/device_view.md
+      - Using threading: code_examples/device_worker.md  
   - Object Reference: objects.md
   - Shelly Models Library: shelly_models_list.md
   - Shelly Temperature Probes: shelly_temp_probes.md

@@ -5,25 +5,27 @@ Client apps should only depend on this class, not on any provider directly.
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 
 from sc_smart_device.models.smart_device_status import SmartDeviceStatus
 from sc_smart_device.models.smart_device_view import SmartDeviceView
-from sc_smart_device.providers.base_provider import BaseProvider
 from sc_smart_device.providers.shelly_provider import ShellyProvider
 from sc_smart_device.providers.tasmota_provider import TasmotaProvider
 
 if TYPE_CHECKING:
     import threading
+    from collections.abc import Iterator
 
     from sc_foundation import SCLogger
+
+    from sc_smart_device.providers.base_provider import BaseProvider
 
 
 class SCSmartDevice:  # noqa: PLR0904
     """Unified smart-device controller.
 
-    Aggregates one or more hardware providers (currently :class:`ShellyProvider`
-    and :class:`TasmotaProvider`) behind a single, stable public API.  Client
+    Aggregates one or more hardware providers (currently `ShellyProvider`
+    and `TasmotaProvider`) behind a single, stable public API.  Client
     apps should never depend on a provider class directly.
     """
 
@@ -133,12 +135,15 @@ class SCSmartDevice:  # noqa: PLR0904
 
         The original ``device_settings`` dict is never mutated — a deep copy is
         returned.
+
+        Returns:
+            A deep-copied settings dict with globally unique IDs assigned.
         """
         settings = copy.deepcopy(device_settings)
         devices: list[dict] = settings.get("Devices") or []
 
-        _comp_types = ("Inputs", "Outputs", "Meters", "TempProbes")
-        _model_key_map = {"Inputs": "inputs", "Outputs": "outputs", "Meters": "meters"}
+        comp_types = ("Inputs", "Outputs", "Meters", "TempProbes")
+        model_key_map = {"Inputs": "inputs", "Outputs": "outputs", "Meters": "meters"}
 
         # ── Phase 1: expand Shelly model-driven component lists ───────────────
         # If a Shelly device omits a component block the provider creates those
@@ -150,7 +155,7 @@ class SCSmartDevice:  # noqa: PLR0904
             counts = ShellyProvider.get_model_component_counts(str(device.get("Model", "")))
             if not counts:
                 continue
-            for ct, model_key in _model_key_map.items():
+            for ct, model_key in model_key_map.items():
                 n = counts.get(model_key, 0)
                 if n > 0 and device.get(ct) is None:
                     # Synthesise n placeholder dicts — providers will fill in names
@@ -158,12 +163,12 @@ class SCSmartDevice:  # noqa: PLR0904
 
         # ── Phase 2: collect all explicitly-set IDs ───────────────────────────
         used_device_ids: set[int] = set()
-        used_comp_ids: dict[str, set[int]] = {ct: set() for ct in _comp_types}
+        used_comp_ids: dict[str, set[int]] = {ct: set() for ct in comp_types}
 
         for device in devices:
             if device.get("ID") is not None:
                 used_device_ids.add(int(device["ID"]))
-            for ct in _comp_types:
+            for ct in comp_types:
                 for comp in device.get(ct) or []:
                     if comp.get("ID") is not None:
                         used_comp_ids[ct].add(int(comp["ID"]))
@@ -178,13 +183,13 @@ class SCSmartDevice:  # noqa: PLR0904
                 i += 1
 
         device_gen = _make_gen(used_device_ids)
-        comp_gens = {ct: _make_gen(used_comp_ids[ct]) for ct in _comp_types}
+        comp_gens = {ct: _make_gen(used_comp_ids[ct]) for ct in comp_types}
 
         # ── Phase 4: assign missing IDs ───────────────────────────────────────
         for device in devices:
             if device.get("ID") is None:
                 device["ID"] = next(device_gen)
-            for ct in _comp_types:
+            for ct in comp_types:
                 for comp in device.get(ct) or []:
                     if comp.get("ID") is None:
                         comp["ID"] = next(comp_gens[ct])
@@ -194,7 +199,11 @@ class SCSmartDevice:  # noqa: PLR0904
     # ── Provider routing helpers ─────────────────────────────────────────────
 
     def _aggregated_status(self) -> SmartDeviceStatus:
-        """Merge normalized status from all providers into one SmartDeviceStatus."""
+        """Merge normalized status from all providers into one SmartDeviceStatus.
+
+        Returns:
+            Aggregated normalized status across all providers.
+        """
         devices: list[dict] = []
         inputs: list[dict] = []
         outputs: list[dict] = []
@@ -224,9 +233,10 @@ class SCSmartDevice:  # noqa: PLR0904
         for provider in self._providers:
             try:
                 provider.get_device(device_identity)
-                return provider
             except RuntimeError:
                 continue
+            else:
+                return provider
         msg = f"Device {device_identity!r} not found in any provider."
         raise RuntimeError(msg)
 
@@ -244,9 +254,10 @@ class SCSmartDevice:  # noqa: PLR0904
         for provider in self._providers:
             try:
                 provider.get_device_component(component_type, component_identity, use_index)
-                return provider
             except RuntimeError:
                 continue
+            else:
+                return provider
         msg = f"{component_type} {component_identity!r} not found in any provider."
         raise RuntimeError(msg)
 
@@ -436,7 +447,7 @@ class SCSmartDevice:  # noqa: PLR0904
             provider.refresh_all_device_statuses()
 
     def refresh(self) -> None:
-        """Alias for :meth:`refresh_all_device_statuses`."""
+        """Alias for [refresh_all_device_statuses][sc_smart_device.SCSmartDevice.refresh_all_device_statuses]."""
         self.refresh_all_device_statuses()
 
     # ── Output control ───────────────────────────────────────────────────────
@@ -481,7 +492,7 @@ class SCSmartDevice:  # noqa: PLR0904
 
         Args:
             event: Shelly event name, e.g. ``"input.toggle_on"``.
-            component: Component dict (from :meth:`get_device_component`).
+            component: Component dict (from [get_device_component][sc_smart_device.SCSmartDevice.get_device_component]).
             url: Override the callback URL. Auto-constructed if None.
             additional_payload: Extra query-string parameters to include.
         """
