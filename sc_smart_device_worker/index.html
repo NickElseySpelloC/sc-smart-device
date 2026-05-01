@@ -790,6 +790,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.does_device_have_webhooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        does_device_have_webhooks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.get_device_information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_device_information
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#sc_smart_device.SmartDeviceWorker.get_latest_status" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -816,6 +838,50 @@
     <span class="md-ellipsis">
       
         get_result
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.is_device_online" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_device_online
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.print_device_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_device_status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.print_model_library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_model_library
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.pull_webhook_event" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pull_webhook_event
       
     </span>
   </a>
@@ -953,6 +1019,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.does_device_have_webhooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        does_device_have_webhooks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.get_device_information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_device_information
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#sc_smart_device.SmartDeviceWorker.get_latest_status" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -979,6 +1067,50 @@
     <span class="md-ellipsis">
       
         get_result
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.is_device_online" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        is_device_online
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.print_device_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_device_status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.print_model_library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        print_model_library
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_smart_device.SmartDeviceWorker.pull_webhook_event" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pull_webhook_event
       
     </span>
   </a>
@@ -1221,6 +1353,145 @@ critical-error notification.  <code>None</code> disables notifications.</p>
 <div class="doc doc-object doc-function">
 
 
+<h2 id="sc_smart_device.SmartDeviceWorker.does_device_have_webhooks" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">does_device_have_webhooks</span><span class="p">(</span><span class="n">device</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return True if any component of the device has webhooks enabled.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="sc_smart_device.SmartDeviceWorker.get_device_information" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_device_information</span><span class="p">(</span><span class="n">device_identity</span><span class="p">,</span> <span class="n">refresh_status</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a consolidated copy of one device and all its components.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>device_identity</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span> | <span title="int">int</span> | <span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Device dict, ID, or name.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>refresh_status</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, fetch fresh state from hardware first.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Device dict augmented with <code>Inputs</code>, <code>Outputs</code>, <code>Meters</code>,</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>and <code>TempProbes</code> sub-lists.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the device is not found in the list of devices or if there is an error getting the status.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h2 id="sc_smart_device.SmartDeviceWorker.get_latest_status" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">get_latest_status</span><span class="p">()</span></code>
 
@@ -1362,6 +1633,336 @@ critical-error notification.  <code>None</code> disables notifications.</p>
             <td>
               <div class="doc-md-description">
                 <p><code>DeviceSequenceResult</code> or <code>None</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="sc_smart_device.SmartDeviceWorker.is_device_online" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">is_device_online</span><span class="p">(</span><span class="n">device_identity</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>See if a device is alive by pinging it.</p>
+<p>Returns the result and updates the device's online status. If we are in simulation mode, always returns True.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>device_identity</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span> | <span title="int">int</span> | <span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The actual device object, device component object, device ID or device name of the device to check. If None, checks all devices.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True if the device is online, False otherwise. If all devices are checked, returns True if all devices are online.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the device is not found in the list of devices.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="sc_smart_device.SmartDeviceWorker.print_device_status" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">print_device_status</span><span class="p">(</span><span class="n">device_identity</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Print the status of a device or all devices.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>device_identity</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> | <span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ID or name of the device to check. If None, checks all devices.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A string representation of the device status.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the device is not found in the list of devices.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="sc_smart_device.SmartDeviceWorker.print_model_library" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">print_model_library</span><span class="p">(</span><span class="n">mode_str</span><span class="o">=</span><span class="s1">&#39;brief&#39;</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Print the model library for all providers that have one.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>mode_str</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The mode of printing. Can be <code>"brief"</code> or <code>"detailed"</code>. Defaults to <code>"brief"</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;brief&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>model_id</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If provided, filters the models by this model name. If None, prints all models.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A string representation of the model library.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="sc_smart_device.SmartDeviceWorker.pull_webhook_event" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">pull_webhook_event</span><span class="p">()</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the oldest queued webhook event and remove it from the queue.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Event dict with keys <code>timestamp</code>, <code>Event</code>, <code>Device</code>,</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>Component</code>, etc.; or None if the queue is empty.</p>
               </div>
             </td>
           </tr>

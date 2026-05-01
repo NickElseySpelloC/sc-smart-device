@@ -3001,7 +3001,7 @@ to safely read device state without holding a lock.</p>
 
 
 <h2 id="sc_smart_device.SCSmartDevice.print_model_library" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">print_model_library</span><span class="p">(</span><span class="n">mode_str</span><span class="o">=</span><span class="s1">&#39;brief&#39;</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">print_model_library</span><span class="p">(</span><span class="n">mode_str</span><span class="o">=</span><span class="s1">&#39;brief&#39;</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">provider_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
@@ -3048,6 +3048,22 @@ to safely read device state without holding a lock.</p>
             <td>
               <div class="doc-md-description">
                 <p>If provided, filters the models by this model name. If None, prints all models.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>provider_id</code>
+            </td>
+            <td>
+                  <code><span title="Optional">Optional</span>(<span title="str">str</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If provided, filters the models by this provider name ('shelly' or 'tasmota'). If None, prints models from all providers.</p>
               </div>
             </td>
             <td>
