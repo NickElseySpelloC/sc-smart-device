@@ -46,8 +46,8 @@ def test_view_get_output_value_missing_key():
     """get_output_value() should return the default for absent keys (e.g. custom keys)."""
     view = smart_device.get_view()
     output_id = view.get_output_id(OUTPUT_1_NAME)
-    assert view.get_output_value(output_id, "Group") is None
-    assert view.get_output_value(output_id, "Group", "Ungrouped") == "Ungrouped"
+    assert view.get_output_value(output_id, "XXX") is None
+    assert view.get_output_value(output_id, "XXX", "Ungrouped") == "Ungrouped"
 
 
 def test_view_get_output_value_invalid_id():

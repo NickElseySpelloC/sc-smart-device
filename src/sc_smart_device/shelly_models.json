@@ -83,7 +83,7 @@
     "protocol": "RPC",
     "inputs": 2,
     "outputs": 1,
-    "meters": 2,
+    "meters": 1,
     "meters_seperate": false,
     "temperature_monitoring": true
   },

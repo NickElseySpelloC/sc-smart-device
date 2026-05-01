@@ -32,3 +32,5 @@ src/*.log
 development/*.log
 development/*.yaml
 tests/logfile.log
+examples/logfile.log
+development/logfile.log

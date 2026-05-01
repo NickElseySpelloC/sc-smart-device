@@ -34,6 +34,7 @@ from sc_smart_device import (
 )
 
 # Output names as defined in switch_config.yaml
+DEVICE_NAME = "Sydney Dev"
 OUTPUT_A = "Sydney Dev A O1"
 OUTPUT_B = "Sydney Dev B O1"
 
@@ -141,6 +142,9 @@ def build_sequence() -> DeviceSequenceRequest:
             retries=1,
             retry_backoff_s=2.0,
         ),
+
+        # Step 9: refresh status so our final snapshot is up to date
+        DeviceStep(StepKind.REFRESH_STATUS),
     ]
 
     req = DeviceSequenceRequest(
@@ -151,12 +155,11 @@ def build_sequence() -> DeviceSequenceRequest:
     return req
 
 
-def run_sequence(logger: SCLogger, smart_switch_control: SCSmartDevice, worker: SmartDeviceWorker, sequence_req: DeviceSequenceRequest) -> None:
+def run_sequence(logger: SCLogger, worker: SmartDeviceWorker, sequence_req: DeviceSequenceRequest) -> None:
     """Build and run the demonstration sequence via SmartDeviceWorker.
 
     Args:
         logger: SCLogger instance.
-        smart_switch_control: SCSmartDevice instance to control.
         worker: SmartDeviceWorker instance to submit the sequence to.
         sequence_req: DeviceSequenceRequest defining the steps to execute.
     """
@@ -192,15 +195,32 @@ def run_sequence(logger: SCLogger, smart_switch_control: SCSmartDevice, worker: 
             f"Sequence '{sequence_req.label}' failed: {result.error}", "error"
         )
 
-    # ── Show final state via SmartDeviceView ──────────────────────────────────
-    # get_latest_status() returns the frozen snapshot saved after the last
-    # REFRESH_STATUS step (the first step in our sequence).  For the very
-    # latest state after the output changes, call get_view() directly.
-    smart_switch_control.refresh_all_device_statuses()
-    final_view: SmartDeviceView = smart_switch_control.get_view()
 
-    logger.log_message("Final device state (from fresh view):", "summary")
-    print_view_summary(logger, final_view)
+def query_devices(logger: SCLogger, worker: SmartDeviceWorker) -> None:
+    """Example of querying the latest device state from the worker's SmartDeviceView snapshot.
+
+    Args:
+        logger: SCLogger instance.
+        worker: SmartDeviceWorker instance to query the view from.
+    """
+    view: SmartDeviceView = worker.get_latest_status()
+
+    logger.log_message("Device state:", "summary")
+    print_view_summary(logger, view)
+
+    # Get a standard and extended device attrbute like online status by device ID
+    device_id = view.get_device_id(f"{DEVICE_NAME} A")
+    temperature = view.get_device_temperature(device_id)
+    hostname = view.get_device_value(device_id, "Hostname", default="Unknown")  # custom attribute defined in switch_config.yaml
+    print(f"{DEVICE_NAME} (ID = {device_id}). Temperature: {temperature}°C, Hostname: {hostname}")
+
+    # Get standard, extended and custom output attributes by output name
+    component_id = view.get_output_id(OUTPUT_A)
+    output_state = view.get_output_state(component_id)
+    object_type = view.get_output_value(component_id, "ObjectType", default="Unknown")  # extended attribute defined by SCSmartDevice
+    group_name = view.get_output_value(component_id, "Group", default="Ungrouped")  # extended attribute defined by SCSmartDevice
+    color = view.get_output_value(component_id, "Colour", default="None")  # custom attribute defined in switch_config.yaml
+    print(f"{OUTPUT_A} (ID = {component_id}) state: {'ON' if output_state else 'OFF'}, ObjectType: {object_type}, Group: {group_name}, Colour: {color}")
 
 
 def shutdown_worker(logger: SCLogger, worker: SmartDeviceWorker, worker_thread: threading.Thread) -> None:
@@ -222,9 +242,11 @@ def main() -> None:
 
     worker, worker_thread = create_worker(logger, smart_switch_control)
 
-    sequence_req = build_sequence()
+    sequence_req = build_sequence()  # noqa: F841
 
-    run_sequence(logger, smart_switch_control, worker=worker, sequence_req=sequence_req)
+    # run_sequence(logger, worker=worker, sequence_req=sequence_req)
+
+    query_devices(logger, worker)
 
     shutdown_worker(logger, worker, worker_thread)
 

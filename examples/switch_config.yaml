@@ -38,6 +38,7 @@ SCSmartDevices:
         - Name: "Sydney Dev A O1"
           Webhooks: True
           Group: "Living Room"
+          Colour: "Red"
         - Name: "Sydney Dev A O2"
           Group: "Living Room"
       Meters:

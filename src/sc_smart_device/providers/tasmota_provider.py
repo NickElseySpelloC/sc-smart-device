@@ -50,6 +50,8 @@ class TasmotaProvider(BaseProvider):
         self.ping_allowed = True
         self.simulation_file_folder: Path | None = None
 
+        self.provider_name = "tasmota"
+
     @staticmethod
     def _raise_runtime_error(message: str) -> NoReturn:
         raise RuntimeError(message)
@@ -185,7 +187,10 @@ class TasmotaProvider(BaseProvider):
         return None
 
     def print_model_library(self, _mode_str: str = "brief", _model_id: str | None = None) -> str:  # noqa: PLR6301
-        return ""  # Tasmota has no model file — config-driven
+        lines = ["Tasmota Model Library:"]
+        lines.append("  Tasmota")
+        return "\n".join(lines)
+
 
     def print_device_status(self, device_identity: int | str | None = None) -> str:
         device_index = None
@@ -666,7 +671,7 @@ class TasmotaProvider(BaseProvider):
             caps.add(DeviceCapability.TEMPERATURE)
         if device.get("Simulate"):
             caps.add(DeviceCapability.SIMULATION)
-        return {
+        base = {
             "ID": device["ID"],
             "Name": device["Name"],
             "Online": device.get("Online", False),
@@ -677,6 +682,11 @@ class TasmotaProvider(BaseProvider):
             "TotalEnergy": device.get("TotalEnergy", 0.0),
             "Capabilities": caps,
         }
+        internal = {"customkeylist", "Outputs", "Inputs", "Meters", "TempProbes", "Tasmota"}
+        for key, value in device.items():
+            if key not in base and key not in internal:
+                base[key] = value
+        return base
 
     @staticmethod
     def _normalize_component(component: dict) -> dict:
@@ -700,6 +710,10 @@ class TasmotaProvider(BaseProvider):
         elif obj_type == "temp_probe":
             base["Temperature"] = component.get("Temperature")
             base["LastReadingTime"] = component.get("LastReadingTime")
+        internal = {"customkeylist"}
+        for key, value in component.items():
+            if key not in base and key not in internal:
+                base[key] = value
         return base
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

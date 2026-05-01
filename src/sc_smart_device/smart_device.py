@@ -584,17 +584,19 @@ class SCSmartDevice:  # noqa: PLR0904
         parts = [p.print_device_status() for p in self._providers if p.get_normalized_status().devices]
         return "\n".join(part for part in parts if part)
 
-    def print_model_library(self, mode_str: str = "brief", model_id: str | None = None) -> str:
+    def print_model_library(self, mode_str: str = "brief", model_id: str | None = None, provider_id: str | None = None) -> str:
         """Prints the model library for all providers that have one.
 
         Args:
             mode_str (str, optional): The mode of printing. Can be "brief" or "detailed". Defaults to "brief".
             model_id (Optional (str), optional): If provided, filters the models by this model name. If None, prints all models.
+            provider_id (Optional (str), optional): If provided, filters the models by this provider name ('shelly' or 'tasmota'). If None, prints models from all providers.
 
         Returns:
             library_info (str): A string representation of the model library.
         """
-        parts = [p.print_model_library(mode_str, model_id) for p in self._providers]
+        provider_id = provider_id.lower() if provider_id else None
+        parts = [p.print_model_library(mode_str, model_id) for p in self._providers if (not provider_id or getattr(p, "provider_name", "").lower() == provider_id)]
         return "\n".join(part for part in parts if part)
 
     # ── Lifecycle ────────────────────────────────────────────────────────────

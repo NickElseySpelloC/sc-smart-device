@@ -231,6 +231,81 @@ class SmartDeviceWorker:
         )
         return self.submit(req)
 
+    # ── SCSmartDevice pass-throughs ──────────────────────────────────────────
+
+    def is_device_online(self, device_identity: dict | int | str | None = None) -> bool:
+        """See if a device is alive by pinging it.
+
+        Returns the result and updates the device's online status. If we are in simulation mode, always returns True.
+
+        Args:
+            device_identity: The actual device object, device component object, device ID or device name of the device to check. If None, checks all devices.
+
+        Returns:
+            True if the device is online, False otherwise. If all devices are checked, returns True if all devices are online.
+
+        Raises:
+            RuntimeError: If the device is not found in the list of devices.
+        """  # noqa: DOC502
+        return self._smart_device.is_device_online(device_identity)
+
+    def pull_webhook_event(self) -> dict | None:
+        """Return the oldest queued webhook event and remove it from the queue.
+
+        Returns:
+            Event dict with keys ``timestamp``, ``Event``, ``Device``,
+            ``Component``, etc.; or None if the queue is empty.
+        """
+        return self._smart_device.pull_webhook_event()
+
+    def does_device_have_webhooks(self, device: dict) -> bool:
+        """Return True if any component of the device has webhooks enabled."""
+        return self._smart_device.does_device_have_webhooks(device)
+
+    def get_device_information(
+        self, device_identity: dict | int | str, refresh_status: bool = False
+    ) -> dict:
+        """Return a consolidated copy of one device and all its components.
+
+        Args:
+            device_identity: Device dict, ID, or name.
+            refresh_status: If True, fetch fresh state from hardware first.
+
+        Returns:
+            Device dict augmented with ``Inputs``, ``Outputs``, ``Meters``,
+            and ``TempProbes`` sub-lists.
+
+        Raises:
+            RuntimeError: If the device is not found in the list of devices or if there is an error getting the status.
+        """  # noqa: DOC502
+        return self._smart_device.get_device_information(device_identity, refresh_status)
+
+    def print_device_status(self, device_identity: int | str | None = None) -> str:
+        """Print the status of a device or all devices.
+
+        Args:
+            device_identity: The ID or name of the device to check. If None, checks all devices.
+
+        Returns:
+            A string representation of the device status.
+
+        Raises:
+            RuntimeError: If the device is not found in the list of devices.
+        """  # noqa: DOC502
+        return self._smart_device.print_device_status(device_identity)
+
+    def print_model_library(self, mode_str: str = "brief", model_id: str | None = None) -> str:
+        """Print the model library for all providers that have one.
+
+        Args:
+            mode_str: The mode of printing. Can be ``"brief"`` or ``"detailed"``. Defaults to ``"brief"``.
+            model_id: If provided, filters the models by this model name. If None, prints all models.
+
+        Returns:
+            A string representation of the model library.
+        """
+        return self._smart_device.print_model_library(mode_str, model_id)
+
     # ── Worker loop ──────────────────────────────────────────────────────────
 
     def run(self) -> None:

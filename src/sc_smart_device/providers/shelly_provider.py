@@ -65,6 +65,7 @@ class ShellyProvider(BaseProvider):
         self.webhook_server: ThreadingHTTPServer | None = None
 
         # Model library (populated by _import_models)
+        self.provider_name = "shelly"
         self.models: list[dict] = []
         self._import_models()
 
@@ -1280,7 +1281,7 @@ class ShellyProvider(BaseProvider):
         if device.get("Protocol") == "RPC":
             caps.add(DeviceCapability.WEBHOOKS)
             caps.add(DeviceCapability.DEVICE_LOCATION)
-        return {
+        base = {
             "ID": device["ID"],
             "Name": device["Name"],
             "Online": device.get("Online", False),
@@ -1291,6 +1292,11 @@ class ShellyProvider(BaseProvider):
             "TotalEnergy": device.get("TotalEnergy", 0.0),
             "Capabilities": caps,
         }
+        internal = {"customkeylist", "Outputs", "Inputs", "Meters", "TempProbes"}
+        for key, value in device.items():
+            if key not in base and key not in internal:
+                base[key] = value
+        return base
 
     @staticmethod
     def _normalize_component(component: dict) -> dict:
@@ -1317,4 +1323,8 @@ class ShellyProvider(BaseProvider):
         elif obj_type == "temp_probe":
             base["Temperature"] = component.get("Temperature")
             base["LastReadingTime"] = component.get("LastReadingTime")
+        internal = {"customkeylist"}
+        for key, value in component.items():
+            if key not in base and key not in internal:
+                base[key] = value
         return base

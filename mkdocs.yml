@@ -9,6 +9,9 @@ theme:
 extra_css:
   - stylesheets/extra.css
     
+hooks:
+  - scripts/generate_shelly_models.py
+
 plugins:
   - search
   - include-markdown
